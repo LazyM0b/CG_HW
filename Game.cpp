@@ -88,7 +88,9 @@ void Game::Run(const ShadersComponent& shaders) {
 
 		isExitRequested = MessageHandler(msg);
 
-		Update(shaders);
+		PrepareFrame(shaders);
+
+		Update();
 
 		RestoreTargets(1, &RenderView);
 
@@ -113,13 +115,13 @@ int Game::MessageHandler(MSG msg) {
 
 	// If windows signals to end the application then exit out.
 	if (msg.message == WM_QUIT) {
-		return 1;
+		return Exit();
 	}
 
 	return 0;
 }
 
-void Game::Update(const ShadersComponent& shaders) {
+void Game::PrepareFrame(const ShadersComponent& shaders) {
 
 	context->ClearState();
 
@@ -141,7 +143,9 @@ void Game::Update(const ShadersComponent& shaders) {
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &shaders.strides, &shaders.offsets);
 	context->VSSetShader(shaders.vertexShader, nullptr, 0);
 	context->PSSetShader(shaders.pixelShader, nullptr, 0);
+}
 
+void Game::Update() {
 
 	auto	curTime = std::chrono::steady_clock::now();
 	float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;
@@ -171,4 +175,15 @@ void Game::Draw(float* color) {
 
 void Game::RestoreTargets(int viewsCnt, ID3D11RenderTargetView* const* RenderView, ID3D11DepthStencilView* DepthStencilView) {
 	context->OMSetRenderTargets(viewsCnt, RenderView, DepthStencilView);
+}
+
+void Game::DestroyResources() {
+
+}
+
+int Game::Exit() {
+
+	DestroyResources();
+
+	return 1;
 }

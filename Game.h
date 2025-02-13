@@ -17,15 +17,15 @@ public:
 	void Initialize(const DisplayWin32& Display);
 	void CreateBackBuffer();
 	void PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector <int> indeces);
-	void PrepareFrame();
 	int MessageHandler(MSG msg);
 	void Run(const ShadersComponent& shaders);
 	void Draw(float* color);
-	void Update(const ShadersComponent& shaders);
-	void UpdateInternal();
+	void PrepareFrame(const ShadersComponent& shaders);
+	void Update();
+	void UpdateInternal(); //?
 	void RestoreTargets(int viewsCnt, ID3D11RenderTargetView* const* RenderView = nullptr, ID3D11DepthStencilView* DepthStencilView = nullptr);
-	void EndFrame();
-	void Exit();
+	void EndFrame(); //?
+	int Exit();
 	void DestroyResources();
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
