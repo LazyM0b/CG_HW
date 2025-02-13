@@ -17,7 +17,7 @@ void GameComponent::Initialize() {
 	LPCWSTR applicationName = L"My3DApp";
 	HINSTANCE hInstance = GetModuleHandle(nullptr);
 
-	Display = DisplayWin32(applicationName, hInstance, 800, 800);
+	Display.Initialize(applicationName, hInstance, 800, 800);
 
 	CurrentGame.Initialize(Display);
 

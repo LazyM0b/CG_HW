@@ -2,17 +2,17 @@
 
 Game::Game() {}
 
-void Game::Initialize(const DisplayWin32& WinDisplay) {
+void Game::Initialize(const DisplayWin32& Display) {
 	swapDescriptor.BufferCount = 2;
-	swapDescriptor.BufferDesc.Width = WinDisplay.clientWidth;
-	swapDescriptor.BufferDesc.Height = WinDisplay.clientHeight;
+	swapDescriptor.BufferDesc.Width = Display.clientWidth;
+	swapDescriptor.BufferDesc.Height = Display.clientHeight;
 	swapDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapDescriptor.BufferDesc.RefreshRate.Numerator = 60;
 	swapDescriptor.BufferDesc.RefreshRate.Denominator = 1;
 	swapDescriptor.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	swapDescriptor.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	swapDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDescriptor.OutputWindow = WinDisplay.hWindow;
+	swapDescriptor.OutputWindow = Display.hWindow;
 	swapDescriptor.Windowed = true;
 	swapDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapDescriptor.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
@@ -34,6 +34,7 @@ void Game::Initialize(const DisplayWin32& WinDisplay) {
 		&device,
 		nullptr,
 		&context);
+
 }
 
 void Game::CreateBackBuffer() {

@@ -3,7 +3,6 @@
 #include "DisplayWin32.h"
 #include "Game.h"
 #include "ShadersComponent.h"
-#include "Game.h"
 #include "TriangleComponent.h"
 
 class GameComponent {

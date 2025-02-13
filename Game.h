@@ -14,7 +14,7 @@ class Game {
 public:
 
 	Game();
-	void Initialize(const DisplayWin32& WinDisplay);
+	void Initialize(const DisplayWin32& Display);
 	void CreateBackBuffer();
 	void PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector <int> indeces);
 	void PrepareFrame();

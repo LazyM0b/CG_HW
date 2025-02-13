@@ -22,7 +22,7 @@ LRESULT CALLBACK DisplayWin32::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, 
 
 DisplayWin32::DisplayWin32() {}
 
-DisplayWin32::DisplayWin32(LPCWSTR appName, HINSTANCE hInst, int windowHeight, int windowWidth) {
+void DisplayWin32::Initialize(LPCWSTR appName, HINSTANCE hInst, int windowHeight, int windowWidth) {
 
 	//initialize window class
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
