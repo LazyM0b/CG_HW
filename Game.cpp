@@ -54,7 +54,7 @@ void Game::PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector 
 	vertexBufDesc.ByteWidth = sizeof(DirectX::XMFLOAT4) * std::size(points);
 
 	D3D11_SUBRESOURCE_DATA vertexData = {};
-	vertexData.pSysMem = &points;
+	vertexData.pSysMem = &points.front();
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
@@ -70,11 +70,12 @@ void Game::PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector 
 	indexBufDesc.ByteWidth = sizeof(int) * std::size(indeces);
 
 	D3D11_SUBRESOURCE_DATA indexData = {};
-	indexData.pSysMem = &indeces;
+	indexData.pSysMem = &indeces.front();
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
 	device->CreateBuffer(&indexBufDesc, &indexData, &indexBuffer);
+
 }
 
 void Game::Run(const ShadersComponent& shaders) {

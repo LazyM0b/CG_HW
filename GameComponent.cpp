@@ -14,6 +14,10 @@ void GameComponent::Initialize() {
 	
 	int indeces[] = { 0,1,2, 1,2,3, 2,3,4, 3,4,5 };
 
+	LPCWSTR applicationName = L"My3DApp";
+	HINSTANCE hInstance = GetModuleHandle(nullptr);
+
+	Display = DisplayWin32(applicationName, hInstance, 800, 800);
 
 	CurrentGame.Initialize(Display);
 
