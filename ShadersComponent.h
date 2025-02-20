@@ -11,7 +11,7 @@ class ShadersComponent {
 public:
 
 	ShadersComponent();
-	int Initialize(const DisplayWin32& WinDisplay, Microsoft::WRL::ComPtr<ID3D11Device>& device, ID3D11DeviceContext* context);
+	int Initialize(HWND hWindow);
 
 	ID3D11InputLayout* layout;
 	ID3D11VertexShader* vertexShader;

@@ -6,7 +6,7 @@
 class DisplayWin32 {
 public:
 	DisplayWin32();
-	void Initialize(LPCWSTR appName, HINSTANCE hInst, int windowHeight, int windowWidth);
+	HWND Init(HINSTANCE hInst, LPCWSTR appName);
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 	
 	unsigned int clientHeight;

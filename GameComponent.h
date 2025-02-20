@@ -15,4 +15,8 @@ public:
 
 	GameComponent();
 	void Initialize();
+	void Draw();
+	void Reload();
+	void Update();
+	void DestroyResources();
 };

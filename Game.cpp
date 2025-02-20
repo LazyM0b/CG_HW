@@ -2,26 +2,32 @@
 
 Game::Game() {}
 
-void Game::Initialize(const DisplayWin32& Display) {
-	swapDescriptor.BufferCount = 2;
-	swapDescriptor.BufferDesc.Width = Display.clientWidth;
-	swapDescriptor.BufferDesc.Height = Display.clientHeight;
-	swapDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapDescriptor.BufferDesc.RefreshRate.Numerator = 60;
-	swapDescriptor.BufferDesc.RefreshRate.Denominator = 1;
-	swapDescriptor.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapDescriptor.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDescriptor.OutputWindow = Display.hWindow;
-	swapDescriptor.Windowed = true;
-	swapDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapDescriptor.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-	swapDescriptor.SampleDesc.Count = 1;
-	swapDescriptor.SampleDesc.Quality = 0;
+void Game::Initialize() {
+	LPCWSTR appName = L"My3DApp";
+	hWindow = display->Init(hInst, appName);
 
+	clientWidth = 640;
+	clientHeight = 480;
 	D3D_FEATURE_LEVEL featureLevel[] = { D3D_FEATURE_LEVEL_11_1 };
 
-	auto result = D3D11CreateDeviceAndSwapChain(
+	DXGI_SWAP_CHAIN_DESC swapDesc = {};
+	swapDesc.BufferDesc.Width = clientWidth;
+	swapDesc.BufferDesc.Height = clientHeight;
+	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
+	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
+	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	swapDesc.SampleDesc.Count = 1;
+	swapDesc.SampleDesc.Quality = 0;
+	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapDesc.BufferCount = 3;
+	swapDesc.OutputWindow = hWindow;
+	swapDesc.Windowed = true;
+	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	auto res = D3D11CreateDeviceAndSwapChain(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
@@ -29,21 +35,86 @@ void Game::Initialize(const DisplayWin32& Display) {
 		featureLevel,
 		1,
 		D3D11_SDK_VERSION,
-		&swapDescriptor,
+		&swapDesc,
 		&swapChain,
 		&device,
 		nullptr,
 		&context);
 
+	if (FAILED(res))
+	{
+		// Well, that was unexpected
+	}
+
+	res = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
+	res = device->CreateRenderTargetView(backBuffer, nullptr, &renderView); // second parameter may be not nullptr if it's not for backbuffer
+
+	//create depth/stencil buffer and view
+
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+
+	depthStencilDesc.Width = clientWidth;
+	depthStencilDesc.Height = clientHeight;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+
+	res = device->CreateTexture2D(&depthStencilDesc, 0, &depthStencilBuffer);
+	res = device->CreateDepthStencilView(depthStencilBuffer, 0, &depthStencilView);
+	context->OMSetRenderTargets(1, &renderView, depthStencilView);
 }
 
-void Game::CreateBackBuffer() {
-
-	auto result = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackBuffer);	// __uuidof(ID3D11Texture2D)
-	result = device->CreateRenderTargetView(BackBuffer, nullptr, &RenderView);
+void Game::InitWindow(HINSTANCE hInst, LPCWSTR appName) {
+	hInst = hInst;
+	display = new DisplayWin32();
 }
 
-void Game::PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector <int> indeces) {
+void Game::PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector <int> indeces, ShadersComponent* shaders) {
+
+	//create vertex shader
+
+	
+
+	D3D11_INPUT_ELEMENT_DESC inputElements[] = {
+		D3D11_INPUT_ELEMENT_DESC {
+			"POSITION",
+			0,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			0,
+			0,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0},
+		D3D11_INPUT_ELEMENT_DESC {
+			"COLOR",
+			0,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			0,
+			D3D11_APPEND_ALIGNED_ELEMENT,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0}
+	};
+
+	//create input layout
+
+	device->CreateInputLayout(
+		inputElements,
+		2,
+		shaders->vertexShaderByteCode->GetBufferPointer(),
+		shaders->vertexShaderByteCode->GetBufferSize(),
+		&shaders->layout);
+
+	CD3D11_RASTERIZER_DESC rastDesc = {};
+	rastDesc.CullMode = D3D11_CULL_NONE;
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+
+	HRESULT res = device->CreateRasterizerState(&rastDesc, &shaders->rastState);
+	context->RSSetState(shaders->rastState);
 
 	//vertex buffer initialization
 	D3D11_BUFFER_DESC vertexBufDesc = {};
@@ -77,30 +148,56 @@ void Game::PrepareResources(std::vector <DirectX::XMFLOAT4> points, std::vector 
 
 	device->CreateBuffer(&indexBufDesc, &indexData, &indexBuffer);
 
+	device->CreateVertexShader(
+		shaders->vertexShaderByteCode->GetBufferPointer(),
+		shaders->vertexShaderByteCode->GetBufferSize(),
+		nullptr, &shaders->vertexShader);
+
+	//create index shader
+
+	device->CreatePixelShader(
+		shaders->pixelShaderByteCode->GetBufferPointer(),
+		shaders->pixelShaderByteCode->GetBufferSize(),
+		nullptr, &shaders->pixelShader);
 }
 
 void Game::Run(const ShadersComponent& shaders) {
+	//timer.Reset();
 	PrevTime = std::chrono::steady_clock::now();
+	totalTime = 0;
+	frameCount = 0;
 
 	MSG msg = {};
 	bool isExitRequested = false;
+
 	while (!isExitRequested) {
 
-		isExitRequested = MessageHandler(msg);
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// If windows signals to end the application then exit out.
+		if (msg.message == WM_QUIT) {
+			isExitRequested = 1;
+			continue;
+		}
+
+		//timer.Tick();
 
 		PrepareFrame(shaders);
 
 		Update();
 
-		RestoreTargets(1, &RenderView);
+		RestoreTargets(1, &renderView);
 
 		float color[] = {totalTime, 0.1f, 0.1f, 1.0f};
 
 		Draw(color);
 
-		RestoreTargets(0);
-
 		swapChain->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
+
+		RestoreTargets();
 	}
 
 	std::cout << "Hello World!\n";
@@ -108,16 +205,6 @@ void Game::Run(const ShadersComponent& shaders) {
 
 int Game::MessageHandler(MSG msg) {
 	// Handle the windows messages.
-	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-
-	// If windows signals to end the application then exit out.
-	if (msg.message == WM_QUIT) {
-		return Exit();
-	}
-
 	return 0;
 }
 
@@ -128,8 +215,8 @@ void Game::PrepareFrame(const ShadersComponent& shaders) {
 	context->RSSetState(shaders.rastState);
 
 	D3D11_VIEWPORT viewport = {};
-	viewport.Width = static_cast<float>(swapDescriptor.BufferDesc.Width);
-	viewport.Height = static_cast<float>(swapDescriptor.BufferDesc.Height);
+	viewport.Width = (float) clientWidth;
+	viewport.Height = (float) clientHeight;
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0;
@@ -168,9 +255,9 @@ void Game::Update() {
 }
 
 void Game::Draw(float* color) {
-	context->ClearRenderTargetView(RenderView, color);
+	context->ClearRenderTargetView(renderView, color);
 
-	context->DrawIndexed(12, 0, 0);
+	context->DrawIndexed(16, 0, 0);
 }
 
 void Game::RestoreTargets(int viewsCnt, ID3D11RenderTargetView* const* RenderView, ID3D11DepthStencilView* DepthStencilView) {
@@ -186,4 +273,8 @@ int Game::Exit() {
 	DestroyResources();
 
 	return 1;
+}
+
+const HWND& Game::MainWindow() {
+	return hWindow;
 }

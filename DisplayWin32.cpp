@@ -20,16 +20,18 @@ LRESULT CALLBACK DisplayWin32::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, 
 	}
 }
 
-DisplayWin32::DisplayWin32() {}
+DisplayWin32::DisplayWin32(): clientWidth(1000), clientHeight(1000) {};
 
-void DisplayWin32::Initialize(LPCWSTR appName, HINSTANCE hInst, int windowHeight, int windowWidth) {
+HWND DisplayWin32::Init(HINSTANCE hInst, LPCWSTR appName) {
 
-	//initialize window class
+	WNDCLASSEX wc;
+	hInstance = hInst;
+
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = WndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
+	wc.hInstance = hInst;
 	wc.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
 	wc.hIconSm = wc.hIcon;
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -38,21 +40,16 @@ void DisplayWin32::Initialize(LPCWSTR appName, HINSTANCE hInst, int windowHeight
 	wc.lpszClassName = appName;
 	wc.cbSize = sizeof(WNDCLASSEX);
 
-	hInstance = hInst;
-	clientHeight = windowHeight;
-	clientWidth = windowWidth;
-
 	// Register the window class.
 	RegisterClassEx(&wc);
 
-	// Initialize window rectangle
-	RECT windowRect = { 0, 0, static_cast<LONG>(windowWidth), static_cast<LONG>(windowHeight) };
+	RECT windowRect = { 0, 0, static_cast<LONG>(clientWidth), static_cast<LONG>(clientHeight) };
 	AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	auto dwStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME;
 
-	auto posX = (GetSystemMetrics(SM_CXSCREEN) - clientHeight) / 2;
-	auto posY = (GetSystemMetrics(SM_CYSCREEN) - clientWidth) / 2;
+	auto posX = (GetSystemMetrics(SM_CXSCREEN) - clientWidth) / 2;
+	auto posY = (GetSystemMetrics(SM_CYSCREEN) - clientHeight) / 2;
 
 	hWindow = CreateWindowEx(WS_EX_APPWINDOW, appName, appName,
 		dwStyle,
@@ -61,11 +58,11 @@ void DisplayWin32::Initialize(LPCWSTR appName, HINSTANCE hInst, int windowHeight
 		windowRect.bottom - windowRect.top,
 		nullptr, nullptr, hInstance, nullptr);
 
-	// Show window on screen
 	ShowWindow(hWindow, SW_SHOW);
 	SetForegroundWindow(hWindow);
 	SetFocus(hWindow);
 
 	ShowCursor(true);
-		
+
+	return hWindow;
 }
