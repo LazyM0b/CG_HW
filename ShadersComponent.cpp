@@ -2,7 +2,7 @@
 
 ShadersComponent::ShadersComponent() {}
 
-int ShadersComponent::Initialize(HWND hWindow) {
+int ShadersComponent::Initialize(HWND hWindow, Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context) {
 
 	ID3DBlob* errorVertexCode = nullptr;
 
@@ -62,6 +62,61 @@ int ShadersComponent::Initialize(HWND hWindow) {
 		return 0;
 	}
 
-	strides = 32;
-	offsets = 0;
+	D3D11_INPUT_ELEMENT_DESC inputElements[] = {
+		D3D11_INPUT_ELEMENT_DESC {
+			"POSITION",
+			0,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			0,
+			0,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0},
+		D3D11_INPUT_ELEMENT_DESC {
+			"COLOR",
+			0,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			0,
+			D3D11_APPEND_ALIGNED_ELEMENT,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0}
+	};
+
+	//create input layout
+
+	device->CreateInputLayout(
+		inputElements,
+		2,
+		vertexShaderByteCode->GetBufferPointer(),
+		vertexShaderByteCode->GetBufferSize(),
+		&layout);
+
+	CD3D11_RASTERIZER_DESC rastDesc = {};
+	rastDesc.CullMode = D3D11_CULL_NONE;
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+
+	res = device->CreateRasterizerState(&rastDesc, &rastState);
+	context->RSSetState(rastState);
+
+	//create vertex shader
+
+	device->CreateVertexShader(
+		vertexShaderByteCode->GetBufferPointer(),
+		vertexShaderByteCode->GetBufferSize(),
+		nullptr, &vertexShader);
+
+	//create index shader
+
+	device->CreatePixelShader(
+		pixelShaderByteCode->GetBufferPointer(),
+		pixelShaderByteCode->GetBufferSize(),
+		nullptr, &pixelShader);
+}
+
+void ShadersComponent::Draw(ID3D11DeviceContext* context)
+{
+	context->RSSetState(rastState);
+
+	context->IASetInputLayout(layout);
+	context->VSSetShader(vertexShader, nullptr, 0);
+	context->PSSetShader(pixelShader, nullptr, 0);
 }

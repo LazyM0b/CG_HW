@@ -11,7 +11,8 @@ class ShadersComponent {
 public:
 
 	ShadersComponent();
-	int Initialize(HWND hWindow);
+	int Initialize(HWND hWindow, Microsoft::WRL::ComPtr<ID3D11Device> device, ID3D11DeviceContext* context);
+	void Draw(ID3D11DeviceContext* context);
 
 	ID3D11InputLayout* layout;
 	ID3D11VertexShader* vertexShader;
@@ -19,6 +20,4 @@ public:
 	ID3D11PixelShader* pixelShader;
 	ID3DBlob* pixelShaderByteCode; 
 	ID3D11RasterizerState* rastState;
-	UINT strides;
-	UINT offsets;
 };
