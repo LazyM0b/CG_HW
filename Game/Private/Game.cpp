@@ -1,8 +1,15 @@
 #include "Game.h"
 
-Game::Game() {}
+Game* Game::instance = nullptr;
 
-void Game::Initialize() {
+Game::Game(HINSTANCE hInst, LPCWSTR appName): hInstance(hInst), applicationName(appName) {
+	display = new DisplayWin32();
+	instance = this;
+}
+
+void Game::Initialize(UINT objCnt) {
+
+	input = new InputDevice(this);
 	hWindow = display->Init(hInstance, applicationName);
 
 	clientWidth = 640;
@@ -45,12 +52,23 @@ void Game::Initialize() {
 	{
 		// Well, that was unexpected
 	}
-}
 
-void Game::InitWindow(HINSTANCE hInst, LPCWSTR appName) {
-	hInstance = hInst;
-	applicationName = appName;
-	display = new DisplayWin32();
+	if (!meshes.empty()) {
+		for (int i = 0; i < objCnt; ++i) {
+			objects.push_back(new GameComponent());
+			objects[i]->Initialize(device, meshes[i]);
+		}
+	}
+	else {
+		for (int i = 0; i < objCnt; ++i) {
+			objects.push_back(new GameComponent());
+			objects[i]->Initialize(device);
+		}
+	}
+
+	shaders = new ShadersComponent();
+
+	shaders->Initialize(hWindow, device, context);
 }
 
 void Game::PrepareResources() {
@@ -76,9 +94,22 @@ void Game::PrepareResources() {
 	res = device->CreateTexture2D(&depthStencilDesc, 0, &depthStencilBuffer);
 	res = device->CreateDepthStencilView(depthStencilBuffer, 0, &depthStencilView);
 	context->OMSetRenderTargets(1, &renderView, depthStencilView);
+
+	D3D11_BUFFER_DESC constBufDesc = {};
+
+
+	constBufDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	constBufDesc.MiscFlags = 0;
+	constBufDesc.StructureByteStride = 0;
+	constBufDesc.ByteWidth = sizeof(float) * 16;
+
+	device->CreateBuffer(&constBufDesc, 0, &constantBuffer);
+	context->VSSetConstantBuffers(0, 1, &constantBuffer);
 }
 
-void Game::Run(ShadersComponent& shaders, TriangleComponent& triangles) {
+void Game::Run() {
 	//timer.Reset();
 	PrevTime = std::chrono::steady_clock::now();
 	totalTime = 0;
@@ -95,24 +126,27 @@ void Game::Run(ShadersComponent& shaders, TriangleComponent& triangles) {
 		}
 
 		// If windows signals to end the application then exit out.
-		if (msg.message == WM_QUIT) {
+		if (MessageHandler(msg.message)) {
 			isExitRequested = 1;
 			continue;
 		}
 
 		//timer.Tick();
 
-		Update();
+		auto	curTime = std::chrono::steady_clock::now();
+		float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;
+		PrevTime = curTime;
+
+		Update(deltaTime);
 
 		context->ClearState();
+
+		context->VSSetConstantBuffers(0, 1, &constantBuffer);
 
 		PrepareFrame();
 
 		RestoreTargets(1, &renderView);
 
-		shaders.Draw(context);
-		triangles.Draw(context);
-		
 		Draw();
 
 		swapChain->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
@@ -123,28 +157,28 @@ void Game::Run(ShadersComponent& shaders, TriangleComponent& triangles) {
 	std::cout << "Hello World!\n";
 }
 
-int Game::MessageHandler(MSG msg) {
-	// Handle the windows messages.
+int Game::MessageHandler(UINT msg) {
+	switch (msg) {
+	case WM_QUIT:
+		return 1;
+	}
 	return 0;
 }
 
 void Game::PrepareFrame() {
 
 	D3D11_VIEWPORT* viewport = new D3D11_VIEWPORT();
-	viewport->Width = (float) clientWidth * 8 / 10;
-	viewport->Height = (float) clientHeight * 8 / 10;
-	viewport->TopLeftX = (float)clientWidth / 10;
-	viewport->TopLeftY = (float)clientHeight / 10;
+	viewport->Width = (float) clientWidth;
+	viewport->Height = (float) clientHeight;
+	viewport->TopLeftX = 0;
+	viewport->TopLeftY = 0;
 	viewport->MinDepth = 0;
 	viewport->MaxDepth = 1.0f; 
 	context->RSSetViewports(1, viewport);
 }
 
-void Game::Update() {
+void Game::Update(float deltaTime) {
 
-	auto	curTime = std::chrono::steady_clock::now();
-	float	deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;
-	PrevTime = curTime;
 
 	totalTime += deltaTime;
 	frameCount++;
@@ -160,14 +194,30 @@ void Game::Update() {
 
 		frameCount = 0;
 	}
+
 }
 
 void Game::Draw() {
 
-	float color[] = { totalTime, 0.1f, 0.1f, 1.0f };
+	float color[] = { 0.5, 0.5f, 0.5f, 1.0f };
 	context->ClearRenderTargetView(renderView, color);
+	shaders->Draw(context);
 
-	context->DrawIndexed(16, 0, 0);
+	D3D11_MAPPED_SUBRESOURCE res = {};
+	Matrix data;
+
+	for (int i = 0; i < objects.size(); ++i) {
+
+		context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+
+		auto dataPtr = reinterpret_cast<float*>(res.pData);
+		memcpy(dataPtr, &data, sizeof(data));
+
+		objects[i]->Draw(context);
+
+		context->Unmap(constantBuffer, 0);
+	}
+
 }
 
 void Game::RestoreTargets(int viewsCnt, ID3D11RenderTargetView* const* RenderView, ID3D11DepthStencilView* DepthStencilView) {

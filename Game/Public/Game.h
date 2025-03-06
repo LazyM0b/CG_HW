@@ -3,27 +3,32 @@
 #include <wrl.h>
 #include <d3d11.h>
 #include <chrono>
-#include <DirectXMath.h>
 #include <vector>
 #include <iostream>
 
 #include "DisplayWin32.h"
 #include "ShadersComponent.h"
-#include "TriangleComponent.h"
+#include "GameComponent.h"
+#include "InputDevice.h"
+#include "SimpleMath.h"
+#include "Math.h"
+#include "conio.h"
 //#include "GameTimer.h"
+
+using namespace DirectX::SimpleMath;
 
 class Game {
 public:
 
 	Game();
-	void InitWindow(HINSTANCE hinst, LPCWSTR appName); // done
-	void Initialize(); // done
+	Game(HINSTANCE hinst, LPCWSTR appName);
+	virtual void Initialize(UINT objCnt); // done
 	void PrepareResources(); // done
-	int MessageHandler(MSG msg); //?
-	void Run(ShadersComponent& shaders, TriangleComponent& triangles);
-	void Draw();
+	int MessageHandler(UINT msg); //?
+	void Run();
+	virtual void Draw();
 	void PrepareFrame();
-	void Update();
+	void Update(float deltaTime);
 	void UpdateInternal(); //?
 	void RestoreTargets(int viewsCnt = 0, ID3D11RenderTargetView* const* RenderView = nullptr, ID3D11DepthStencilView* DepthStencilView = nullptr); // done
 	void EndFrame(); //?
@@ -36,11 +41,18 @@ public:
 	HINSTANCE hInstance; 
 	LPCWSTR applicationName;
 	HWND hWindow;
+	static Game* instance;
+
+	std::vector<GameComponent*> objects;
+	std::vector<MeshTypes> meshes;
+	ShadersComponent* shaders;
+	InputDevice* input;
 
 	DXGI_SWAP_CHAIN_DESC swapDescriptor;
 	ID3D11DeviceContext* context;
 	IDXGISwapChain* swapChain; 
 	ID3D11Texture2D* backBuffer;
+	ID3D11Buffer* constantBuffer;
 	ID3D11Texture2D* depthStencilBuffer;
 	ID3D11RenderTargetView* renderView;
 	ID3D11DepthStencilView* depthStencilView; 

@@ -19,29 +19,40 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FiveSquares.h" />
+    <ClInclude Include="Game\Public\Delegates.h" />
+    <ClInclude Include="Game\Public\DisplayWin32.h" />
+    <ClInclude Include="Game\Public\Game.h" />
+    <ClInclude Include="Game\Public\GameComponent.h" />
+    <ClInclude Include="Game\Public\GameTimer.h" />
+    <ClInclude Include="Game\Public\InputDevice.h" />
+    <ClInclude Include="Game\Public\Keys.h" />
+    <ClInclude Include="Game\Public\ShadersComponent.h" />
+    <ClInclude Include="Game\Public\TriangleComponent.h" />
+    <ClInclude Include="PongGame.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="CG_HW.cpp" />
-    <ClCompile Include="DisplayWin32.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameComponent.cpp" />
-    <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="InputDevice.cpp" />
-    <ClCompile Include="ShadersComponent.cpp" />
-    <ClCompile Include="TriangleComponent.cpp" />
+    <ClCompile Include="FiveSquares.cpp" />
+    <ClCompile Include="Game\Private\Delegates.cpp" />
+    <ClCompile Include="Game\Private\DisplayWin32.cpp" />
+    <ClCompile Include="Game\Private\Game.cpp" />
+    <ClCompile Include="Game\Private\GameComponent.cpp" />
+    <ClCompile Include="Game\Private\GameTimer.cpp" />
+    <ClCompile Include="Game\Private\InputDevice.cpp" />
+    <ClCompile Include="Game\Private\ShadersComponent.cpp" />
+    <ClCompile Include="Game\Private\TriangleComponent.cpp" />
+    <ClCompile Include="PongGame.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\MyVeryFirstShader.hlsl">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSMain</EntryPointName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="DisplayWin32.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameComponent.h" />
-    <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="InputDevice.h" />
-    <ClInclude Include="ShadersComponent.h" />
-    <ClInclude Include="TriangleComponent.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -129,6 +140,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Projects\Visual Studio\CG_HW\Shaders;D:\Projects\Visual Studio\CG_HW\Game\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,9 +161,17 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\directxtk_desktop_win10.2024.10.29.1\build\native\directxtk_desktop_win10.targets" Condition="Exists('packages\directxtk_desktop_win10.2024.10.29.1\build\native\directxtk_desktop_win10.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\directxtk_desktop_win10.2024.10.29.1\build\native\directxtk_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\directxtk_desktop_win10.2024.10.29.1\build\native\directxtk_desktop_win10.targets'))" />
+  </Target>
 </Project>

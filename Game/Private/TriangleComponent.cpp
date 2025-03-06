@@ -3,21 +3,6 @@
 TriangleComponent::TriangleComponent() {}
 
 void TriangleComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device) {
-	points = {
-
-		//fill viewport with grey
-		{DirectX::XMFLOAT4(1.0f, 1.0f, 0.5f, 1.0f),	DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f)},
-		{DirectX::XMFLOAT4(-1.0f, -1.0f, 0.5f, 1.0f),DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f)},
-		{DirectX::XMFLOAT4(1.0f, -1.0f, 0.5f, 1.0f),	DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f)},
-		{DirectX::XMFLOAT4(-1.0f, 1.0f, 0.5f, 1.0f),	DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f)},
-
-		{DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),	DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
-		{DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),	DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)},
-		{DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),	DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
-		{DirectX::XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),	DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-	};
-
-	indeces = { 0,1,2, 1,0,3, 4,5,6, 5,4,7 };
 
 	D3D11_BUFFER_DESC vertexBufDesc = {};
 	vertexBufDesc.Usage = D3D11_USAGE_DEFAULT;

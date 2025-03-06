@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <WinUser.h>
 
+#include "iostream"
+
 class DisplayWin32 {
 public:
 	DisplayWin32();

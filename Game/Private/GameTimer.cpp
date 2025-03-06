@@ -12,7 +12,7 @@ void GameTimer::Tick() {
 		return;
 	}
 
-	UINT curTimer;
+	float curTimer;
 	QueryPerformanceCounter((LARGE_INTEGER*)&curTimer);
 	curTime = curTimer;
 

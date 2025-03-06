@@ -17,6 +17,7 @@ public:
 	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device);
 	void Draw(ID3D11DeviceContext* context);
 
+
 	std::vector <Vertex> points;
 	std::vector <int> indeces;
 	ID3D11Buffer* vertexBuffer;

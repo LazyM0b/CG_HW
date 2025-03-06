@@ -1,5 +1,5 @@
-#include "DisplayWin32.h"
-#include "GameComponent.h"
+#include "PongGame.h"
+#include "FiveSquares.h"
 
 
 #pragma comment(lib, "d3d11.lib")
@@ -9,7 +9,22 @@
 
 int main()
 {
-	GameComponent GameInstance;
+	HINSTANCE hinst = GetModuleHandle(nullptr);
+	LPCWSTR applicationName = L"My3DApp";
 
-	GameInstance.Initialize();
+	//FiveSquares
+	/*FiveSquares CurrentGame(hinst, applicationName);
+
+	CurrentGame.Initialize(5);*/
+	//
+
+	//Pong
+	PongGame CurrentGame(hinst, applicationName);
+
+	CurrentGame.Initialize(15);
+	//
+
+	CurrentGame.PrepareResources();
+
+	CurrentGame.Run();
 }
