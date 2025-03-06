@@ -153,8 +153,6 @@ void Game::Run() {
 
 		RestoreTargets();
 	}
-
-	std::cout << "Hello World!\n";
 }
 
 int Game::MessageHandler(UINT msg) {

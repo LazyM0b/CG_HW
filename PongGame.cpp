@@ -73,12 +73,16 @@ void PongGame::Draw() {
 			for (int j = 0; j < i; ++j) {
 				if (objects[j]->collisionEnabled && circle->collider.Intersects(objects[j]->collider)) {
 					float circleAngle = atan2(sin(circle->rotation.ToEuler().z), -cos(circle->rotation.ToEuler().z));
-					
+
+					if (objects[j]->translation.y - circle->translation.y < 0)
+						circleAngle += (asin(1.0f) - circleAngle) * abs(objects[j]->translation.y - circle->translation.y) / objects[j]->scale.x;
+					else
+						circleAngle += (asin(-1.0f) - circleAngle) * abs(objects[j]->translation.y - circle->translation.y) / objects[j]->scale.x;
+
 					if (sin(objects[j]->rotation.ToEuler().z) * sin(circle->rotation.ToEuler().z) > 0)
  						circle->speed *= 1 + sin(objects[j]->rotation.ToEuler().z) / 5;
 					else 
 						circle->speed /= 1 + sin(objects[j]->rotation.ToEuler().z) / 5;
-					std::cout << circle->speed << std::endl;
 
 					circle->rotation = Quaternion::CreateFromAxisAngle( Vector3(0.0f, 0.0f, 1.0f), circleAngle);
 					circle->velocity = Vector3(cos(circle->rotation.ToEuler().z) * circle->speed, sin(circle->rotation.ToEuler().z) * circle->speed, 0.0f);
@@ -118,6 +122,7 @@ void PongGame::ShowScores()
 	std::cout << "Player 1 score: " << score1 << ", Player 2 score: " << score2 << std::endl;
 }
 
+//set initial translations and rotations
 void PongGame::ResetGame() 
 {
 	float marksCnt = objects.size() - 3;
