@@ -5,14 +5,13 @@
 
 using namespace DirectX::SimpleMath;
 
-class PongGame : public Game {
+class SolarSystem : public Game {
 public:
-	PongGame(HINSTANCE hinst, LPCTSTR hwindow);
+	SolarSystem(HINSTANCE hinst, LPCTSTR hwindow);
 	void Initialize(UINT objCnt) override;
 	void Draw() override;
-	void ShowScores();
 	void ResetGame();
+	void SwitchPlanet();
 
-	UINT score1 = 0;
-	UINT score2 = 0;
+	int planetToTrack = 8;
 };

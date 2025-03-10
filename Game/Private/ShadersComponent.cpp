@@ -91,7 +91,7 @@ int ShadersComponent::Initialize(HWND hWindow, Microsoft::WRL::ComPtr<ID3D11Devi
 		&layout);
 
 	CD3D11_RASTERIZER_DESC rastDesc = {};
-	rastDesc.CullMode = D3D11_CULL_NONE;
+	rastDesc.CullMode = D3D11_CULL_FRONT;
 	rastDesc.FillMode = D3D11_FILL_SOLID;
 
 	res = device->CreateRasterizerState(&rastDesc, &rastState);

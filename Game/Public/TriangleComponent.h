@@ -1,13 +1,16 @@
 #pragma once
 
-#include <DirectXMath.h>
 #include <d3d11.h>
 #include <vector>
 #include <wrl.h>
 
+#include "SimpleMath.h"
+
+using namespace DirectX::SimpleMath;
+
 struct Vertex {
-	DirectX::XMFLOAT4 location;
-	DirectX::XMFLOAT4 color;
+	Vector4 location;
+	Vector4 color;
 };
 
 class TriangleComponent {
@@ -22,6 +25,8 @@ public:
 	std::vector <int> indeces;
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
+	ID3D11Buffer* worldPosBuffer;
+	ID3D11Buffer* localPosBuffer;
 	UINT strides;
 	UINT offsets;
 };

@@ -55,20 +55,26 @@ void Game::Initialize(UINT objCnt) {
 
 	if (!meshes.empty()) {
 		for (int i = 0; i < objCnt; ++i) {
+			std::vector<Vector4> colors;
+
+			Vector3 color((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
+			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
+			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
+
 			objects.push_back(new GameComponent());
-			objects[i]->Initialize(device, meshes[i]);
+			if (!(this->applicationName == L"SolarSys"))
+				objects[i]->Initialize(device, meshes[i]);
+			else
+				objects[i]->Initialize(device, meshes[i], colors, LOD);
 		}
 	}
-	else {
-		for (int i = 0; i < objCnt; ++i) {
-			objects.push_back(new GameComponent());
-			objects[i]->Initialize(device);
-		}
-	}
+	else exit(1);
 
 	shaders = new ShadersComponent();
 
 	shaders->Initialize(hWindow, device, context);
+
+	camManager = new CameraManager(2000.0f);
 }
 
 void Game::PrepareResources() {
@@ -94,19 +100,6 @@ void Game::PrepareResources() {
 	res = device->CreateTexture2D(&depthStencilDesc, 0, &depthStencilBuffer);
 	res = device->CreateDepthStencilView(depthStencilBuffer, 0, &depthStencilView);
 	context->OMSetRenderTargets(1, &renderView, depthStencilView);
-
-	D3D11_BUFFER_DESC constBufDesc = {};
-
-
-	constBufDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	constBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	constBufDesc.MiscFlags = 0;
-	constBufDesc.StructureByteStride = 0;
-	constBufDesc.ByteWidth = sizeof(float) * 16;
-
-	device->CreateBuffer(&constBufDesc, 0, &constantBuffer);
-	context->VSSetConstantBuffers(0, 1, &constantBuffer);
 }
 
 void Game::Run() {
@@ -141,11 +134,9 @@ void Game::Run() {
 
 		context->ClearState();
 
-		context->VSSetConstantBuffers(0, 1, &constantBuffer);
-
 		PrepareFrame();
 
-		RestoreTargets(1, &renderView);
+		RestoreTargets(1, &renderView, depthStencilView);
 
 		Draw();
 
@@ -206,20 +197,23 @@ void Game::Draw() {
 
 	for (int i = 0; i < objects.size(); ++i) {
 
-		context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+		context->VSSetConstantBuffers(0, 1, &objects[i]->worldPosBuffer);
+
+		context->Map(objects[i]->worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
 
 		auto dataPtr = reinterpret_cast<float*>(res.pData);
 		memcpy(dataPtr, &data, sizeof(data));
 
 		objects[i]->Draw(context);
 
-		context->Unmap(constantBuffer, 0);
+		context->Unmap(objects[i]->worldPosBuffer, 0);
 	}
 
 }
 
 void Game::RestoreTargets(int viewsCnt, ID3D11RenderTargetView* const* RenderView, ID3D11DepthStencilView* DepthStencilView) {
 	context->OMSetRenderTargets(viewsCnt, RenderView, DepthStencilView);
+	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1, 1);
 }
 
 void Game::DestroyResources() {

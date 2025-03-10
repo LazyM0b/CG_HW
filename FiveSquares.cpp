@@ -70,16 +70,16 @@ void FiveSquares::Draw()
 		data *= Matrix::CreateFromYawPitchRoll(objects[i]->rotation.ToEuler());
 		data *= Matrix::CreateTranslation(objects[i]->translation);
 
-		context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+		context->Map(objects[i]->worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
 
-		data.Transpose();
+		data = data.Transpose();
 
 		auto dataPtr = reinterpret_cast<float*>(res.pData);
 		memcpy(dataPtr, &data, sizeof(data));
 
 		objects[i]->Draw(context);
 
-		context->Unmap(constantBuffer, 0);
+		context->Unmap(objects[i]->worldPosBuffer, 0);
 	}
 }
 

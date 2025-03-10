@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FiveSquares.h" />
+    <ClInclude Include="Game\Public\CameraManager.h" />
     <ClInclude Include="Game\Public\Delegates.h" />
     <ClInclude Include="Game\Public\DisplayWin32.h" />
     <ClInclude Include="Game\Public\Game.h" />
@@ -30,10 +31,12 @@
     <ClInclude Include="Game\Public\ShadersComponent.h" />
     <ClInclude Include="Game\Public\TriangleComponent.h" />
     <ClInclude Include="PongGame.h" />
+    <ClInclude Include="SolarSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CG_HW.cpp" />
     <ClCompile Include="FiveSquares.cpp" />
+    <ClCompile Include="Game\Private\CameraManager.cpp" />
     <ClCompile Include="Game\Private\Delegates.cpp" />
     <ClCompile Include="Game\Private\DisplayWin32.cpp" />
     <ClCompile Include="Game\Private\Game.cpp" />
@@ -43,6 +46,7 @@
     <ClCompile Include="Game\Private\ShadersComponent.cpp" />
     <ClCompile Include="Game\Private\TriangleComponent.cpp" />
     <ClCompile Include="PongGame.cpp" />
+    <ClCompile Include="SolarSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -52,6 +56,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
       <FileType>Document</FileType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSMain</EntryPointName>
     </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -140,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Projects\Visual Studio\CG_HW\Shaders;D:\Projects\Visual Studio\CG_HW\Game\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Projects\Visual Studio\CG_HW\Game\Private;D:\Projects\Visual Studio\CG_HW\Shaders;D:\Projects\Visual Studio\CG_HW\Game\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,6 +160,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Projects\Visual Studio\CG_HW\Shaders;D:\Projects\Visual Studio\CG_HW\Game\Public;D:\Projects\Visual Studio\CG_HW\Game\Private;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

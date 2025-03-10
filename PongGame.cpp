@@ -21,7 +21,6 @@ void PongGame::Draw() {
 	float color[] = { 0.5, 0.5f, 0.5f, 1.0f };
 	context->ClearRenderTargetView(renderView, color);
 	shaders->Draw(context);
-	Matrix data;
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 
@@ -92,28 +91,36 @@ void PongGame::Draw() {
 			circle->translation += circle->velocity;
 		}
 
-		data = Matrix::CreateScale(objects[i]->scale);
-		data *= Matrix::CreateFromYawPitchRoll(objects[i]->rotation.ToEuler());
-		data *= Matrix::CreateTranslation(objects[i]->translation);
+		objects[i]->positionL = Matrix::CreateScale(objects[i]->scale);
+		objects[i]->positionL *= Matrix::CreateFromYawPitchRoll(objects[i]->rotation.ToEuler());
+		objects[i]->positionL *= Matrix::CreateTranslation(objects[i]->translation);
+		objects[i]->positionL = objects[i]->positionL.Transpose();
+		
 
 		if (objects[i]->collisionEnabled) {
 			objects[i]->collider.Center = objects[i]->translation;
 		}
 
-		context->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+		context->VSSetConstantBuffers(0, 1, &objects[i]->worldPosBuffer);
+		context->Map(objects[i]->worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
 
-		data.Transpose();
 
 		auto dataPtr = reinterpret_cast<float*>(res.pData);
-		memcpy(dataPtr, &data, sizeof(data));
+		memcpy(dataPtr, &objects[i]->positionW, sizeof(objects[i]->positionW));
 
-		if (i == objects.size()) {
-			circle->Draw(context);
-		}
-		else
+		context->Unmap(objects[i]->worldPosBuffer, 0);
+
+		context->VSSetConstantBuffers(1, 1, &objects[i]->localPosBuffer);
+		context->Map(objects[i]->localPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+
+
+		dataPtr = reinterpret_cast<float*>(res.pData);
+		memcpy(dataPtr, &objects[i]->positionL, sizeof(objects[i]->positionL));
+
+		context->Unmap(objects[i]->localPosBuffer, 0);
+
 		objects[i]->Draw(context);
 
-		context->Unmap(constantBuffer, 0);
 	}
 }
 

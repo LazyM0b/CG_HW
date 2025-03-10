@@ -37,6 +37,18 @@ void TriangleComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device) 
 
 	strides = sizeof(Vertex);
 	offsets = 0;
+
+	D3D11_BUFFER_DESC constBufDesc = {};
+
+	constBufDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	constBufDesc.MiscFlags = 0;
+	constBufDesc.StructureByteStride = 0;
+	constBufDesc.ByteWidth = sizeof(float) * 16;
+
+	device->CreateBuffer(&constBufDesc, 0, &worldPosBuffer);
+	device->CreateBuffer(&constBufDesc, 0, &localPosBuffer);
 }
 
 void TriangleComponent::Draw(ID3D11DeviceContext* context)

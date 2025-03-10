@@ -9,28 +9,34 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 	switch (type)
 	{
 	case Triangle:
+		pointsCnt = 3;
+
 		points = {
-		{XMFLOAT4(1.0f, 1.0f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-		{XMFLOAT4(-1.0f, -1.0f, 0.5f, 1.0f),XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-		{XMFLOAT4(-1.0f, 1.0f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(1.0f, 1.0f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(-1.0f, -1.0f, 0.5f, 1.0f),Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(-1.0f, 1.0f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
 		};
 		indeces = { 0,1,2 };
 		break;
 	case Square:
+		pointsCnt = 4;
+
 		points = {
-		{XMFLOAT4(1.0f, 1.0f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-		{XMFLOAT4(-1.0f, -1.0f, 0.5f, 1.0f),XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-		{XMFLOAT4(1.0f, -1.0f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-		{XMFLOAT4(-1.0f, 1.0f, 0.5f, 1.0f),	XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(1.0f, 1.0f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(-1.0f, -1.0f, 0.5f, 1.0f),Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(1.0f, -1.0f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+		{Vector4(-1.0f, 1.0f, 0.5f, 1.0f),	Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
 		};
 		indeces = { 0,1,2, 1,0,3 };
 		break;
 	case Circle:
-		points = { { XMFLOAT4(0.0f, 0.0f, 0.5f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) } };
+		pointsCnt = 100;
+
+		points = { { Vector4(0.0f, 0.0f, 0.5f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f) } };
 		for (int i = 1; i < pointsCnt; ++i) {
 			points.push_back(Vertex());
-			points[i].location = XMFLOAT4(cos((i - 1) / (pointsCnt - 2.0f) * 6.28f), sin((i - 1) / (pointsCnt - 2.0f) * 6.28f), 0.5f, 1.0f);
-			points[i].color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			points[i].location = Vector4(cos((i - 1) / (pointsCnt - 2.0f) * 6.28f), sin((i - 1) / (pointsCnt - 2.0f) * 6.28f), 0.5f, 1.0f);
+			points[i].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 			indeces.push_back(0);
 			indeces.push_back((i + 1) % pointsCnt);
 			indeces.push_back(i);
@@ -39,7 +45,85 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 		break;
 	}
 
-	collider = BoundingBox(SimpleMath::Vector3::Zero, SimpleMath::Vector3::One);
+	collider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
+	TriangleComponent::Initialize(device);
+}
+
+void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vector4> colors, UINT detailsLVL) {
+	this->type = type; 
+	float phi = (1.0f + sqrt(5.0f)) * 0.5f; // golden ratio
+	float coord1 = 1.0f;
+	float coord2 = 1.0f / phi;
+	int numSubdivide;
+
+	switch (type)
+	{
+	case Triangle:
+		pointsCnt = 3;
+
+		points = {
+		{Vector4(1.0f, 1.0f, 0.5f, 1.0f),	colors[0]},
+		{Vector4(-1.0f, -1.0f, 0.5f, 1.0f),colors[1]},
+		{Vector4(-1.0f, 1.0f, 0.5f, 1.0f),	colors[2]},
+		};
+		indeces = { 0,1,2 };
+		break;
+	case Square:
+		pointsCnt = 4;
+
+		points = {
+		{Vector4(1.0f, 1.0f, 0.5f, 1.0f),	colors[0]},
+		{Vector4(-1.0f, -1.0f, 0.5f, 1.0f),colors[1]},
+		{Vector4(1.0f, -1.0f, 0.5f, 1.0f),	colors[2]},
+		{Vector4(-1.0f, 1.0f, 0.5f, 1.0f),	colors[3]},
+		};
+		indeces = { 0,1,2, 1,0,3 };
+		break;
+	case Circle:
+		pointsCnt = 100;
+
+		points = { { Vector4(0.0f, 0.0f, 0.5f, 1.0f), colors[0] } };
+		for (int i = 1; i < pointsCnt; ++i) {
+			points.push_back(Vertex());
+			points[i].location = Vector4(cos((i - 1) / (pointsCnt - 2.0f) * 6.28f), sin((i - 1) / (pointsCnt - 2.0f) * 6.28f), 0.5f, 1.0f);
+			points[i].color = colors[i];
+			indeces.push_back(0);
+			indeces.push_back((i + 1) % pointsCnt);
+			indeces.push_back(i);
+		}
+		break;
+	case Sphere:
+
+		pointsCnt = 12;
+		numSubdivide = detailsLVL;
+
+		points =
+		{
+			{Vector4(0.0f, coord2, -coord1, 1.0f), colors[0] },
+			{Vector4(coord2, coord1, 0.0f, 1.0f), colors[1] },
+			{Vector4(-coord2, coord1, 0.0f, 1.0f), colors[0] + colors[1]},
+			{Vector4(0.0f, coord2, coord1, 1.0f), colors[1] + colors[0]},
+			{Vector4(0.0f, -coord2, coord1, 1.0f), colors[0] },
+			{Vector4(-coord1, 0.0f, coord2, 1.0f), colors[1]},
+			{Vector4(0.0f, -coord2, -coord1, 1.0f), colors[0] - colors[1]},
+			{Vector4(coord1, 0.0f, -coord2, 1.0f), colors[1] - colors[0]},
+			{Vector4(coord1, 0.0f, coord2, 1.0f), colors[0]},
+			{Vector4(-coord1, 0.0f, -coord2, 1.0f), colors[1] }, 
+			{Vector4(coord2, -coord1, 0.0f, 1.0f), colors[0] + colors[1]},
+			{Vector4(-coord2, -coord1, 0.0f, 1.0f), colors[1] - colors[0]}
+		};		indeces =
+		{
+		2,1,0, 1,2,3, 5,4,3, 4,8,3, 7,6,0,
+		6,9,0, 11,10,4, 10,11,6, 9,5,2, 5,9,11,
+		8,7,1, 7,8,10, 2,5,3, 8,1,3, 9,2,0,
+		1,7,0, 11,9,6, 7,10,6, 5,11,4, 10,8,4
+		};		for (int j = 0; j < numSubdivide; ++j) {			SphereSubdivide(points, indeces);			pointsCnt = points.size();			for (int i = 0; i < pointsCnt; ++i)				PointNormalize(points[i]);		}
+		break;
+	default:
+		break;
+	}
+
+	collider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
 	TriangleComponent::Initialize(device);
 }
 
@@ -49,21 +133,114 @@ void GameComponent::Draw(ID3D11DeviceContext* context) {
 	switch (type)
 	{
 	case Triangle:
-		context->DrawIndexed(3, 0, 0);
+		context->DrawIndexed(indeces.size(), 0, 0);
 		break;
 	case Square:
-		context->DrawIndexed(6, 0, 0);
+		context->DrawIndexed(indeces.size(), 0, 0);
 		break;
 	case Circle:
-		context->DrawIndexed(pointsCnt * 3 - 3, 0, 0);
+		context->DrawIndexed(indeces.size(), 0, 0);
 		break;
+	case Sphere:
+		context->DrawIndexed(indeces.size(), 0, 0);
 	default:
 		break;
 	}
 }
 
 void GameComponent::Reload() {
-	scale = SimpleMath::Vector3::One;
-	rotation = rotation.CreateFromYawPitchRoll(SimpleMath::Vector3(0.0f, 0.0f, 0.0f));
-	translation = SimpleMath::Vector3::Zero;
+	scale = Vector3::One;
+	rotation = rotation.CreateFromYawPitchRoll(Vector3(0.0f, 0.0f, 0.0f));
+	translation = Vector3::Zero;
+}
+
+void GameComponent::SphereSubdivide(std::vector<Vertex>& points, std::vector<int>& indeces)
+{
+	std::vector<Vertex> pointsTmp;
+	std::vector<int> indecesTmp;
+	int startIndex = points.size();
+	int index1 = -1, index2 = -1, index3 = -1, indTmp = -1;
+	int curSize = points.size();
+
+	for (auto point : points)
+		pointsTmp.push_back(point);
+
+	for (int i = 0; i < indeces.size() / 3; ++i) {
+
+		Vertex point1 = { findCenter(points[indeces[i * 3]].location, points[indeces[i * 3 + 1]].location), points[indeces[i * 3 + 2]].color };
+		//Vertex point1 = { findCenter(points[indeces[i * 3]].location, points[indeces[i * 3 + 1]].location), points[1].color };
+		index1 = curSize;
+
+		indTmp = CheckForUnique(points, point1, startIndex);
+
+		if (indTmp == -1) {
+			pointsTmp.push_back(point1);
+			++curSize;
+		}
+		else
+			index1 = indTmp;
+
+		Vertex point2 = { findCenter(points[indeces[i * 3]].location, points[indeces[i * 3 + 2]].location), points[indeces[i * 3 + 1]].color };
+		//Vertex point2 = { findCenter(points[indeces[i * 3]].location, points[indeces[i * 3 + 2]].location), points[1].color }; 
+		index2 = curSize;
+
+		indTmp = CheckForUnique(points, point2, startIndex);
+
+		if (indTmp == -1) {
+			pointsTmp.push_back(point2);
+			++curSize;
+		}
+		else
+			index2 = indTmp;
+
+		Vertex point3 = { findCenter(points[indeces[i * 3 + 1]].location, points[indeces[i * 3 + 2]].location), points[indeces[i * 3]].color };
+		//Vertex point3 = { findCenter(points[indeces[i * 3 + 1]].location, points[indeces[i * 3 + 2]].location), points[0].color };
+		index3 = curSize;
+
+		indTmp = CheckForUnique(points, point3, startIndex);
+
+		if (indTmp == -1) {
+			pointsTmp.push_back(point3);
+			++curSize;
+		}
+		else
+			index3 = indTmp;
+
+
+		indecesTmp.push_back(indeces[i * 3]);
+		indecesTmp.push_back(index1);
+		indecesTmp.push_back(index2);
+
+		indecesTmp.push_back(indeces[i * 3 + 1]);
+		indecesTmp.push_back(index3);
+		indecesTmp.push_back(index1);
+
+		indecesTmp.push_back(indeces[i * 3 + 2]);
+		indecesTmp.push_back(index2);
+		indecesTmp.push_back(index3);
+
+		indecesTmp.push_back(index1);
+		indecesTmp.push_back(index3);
+		indecesTmp.push_back(index2);
+	}
+	points.clear();
+	indeces.clear();
+	points = pointsTmp;
+	indeces = indecesTmp;
+}
+
+Vector4 GameComponent::findCenter(const Vector4& point1, const Vector4& point2) {
+	return Vector4((point1.x + point2.x) / 2.0f, (point1.y + point2.y) / 2.0f, (point1.z + point2.z) / 2.0f, 1.0f);
+}
+
+int GameComponent::CheckForUnique(const std::vector<Vertex>& points, Vertex pointNew, int startInd) {
+	for (int i = startInd; i < points.size(); ++i) {
+		if (points[i].location.x == pointNew.location.x && points[i].location.y == pointNew.location.y && points[i].location.z == pointNew.location.z)
+			return i;
+	}
+	return -1;
+}
+
+void GameComponent::PointNormalize(Vertex& point)
+{	float tmp = std::sqrt(std::pow(point.location.x, 2) + std::pow(point.location.y, 2) + std::pow(point.location.z, 2));	point.location.x /= tmp;	point.location.y /= tmp;	point.location.z /= tmp;
 }

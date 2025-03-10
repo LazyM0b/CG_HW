@@ -10,6 +10,7 @@
 #include "ShadersComponent.h"
 #include "GameComponent.h"
 #include "InputDevice.h"
+#include "CameraManager.h"
 #include "SimpleMath.h"
 #include "Math.h"
 #include "conio.h"
@@ -50,16 +51,19 @@ public:
 
 	DXGI_SWAP_CHAIN_DESC swapDescriptor;
 	ID3D11DeviceContext* context;
-	IDXGISwapChain* swapChain; 
+	IDXGISwapChain* swapChain;
 	ID3D11Texture2D* backBuffer;
-	ID3D11Buffer* constantBuffer;
 	ID3D11Texture2D* depthStencilBuffer;
 	ID3D11RenderTargetView* renderView;
 	ID3D11DepthStencilView* depthStencilView; 
+
+	CameraManager* camManager;
+	Matrix projectionMatrix;
 	//GameTimer timer;
 
 	std::chrono::time_point<std::chrono::steady_clock> PrevTime;
 	float totalTime = 0;
+	UINT LOD = 6;
 	UINT frameCount = 0;
 	UINT clientWidth;
 	UINT clientHeight;
