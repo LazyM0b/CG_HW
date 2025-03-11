@@ -28,7 +28,7 @@ int main()
 	PongGame Pong(hinst, applicationName2);
 
 	//
-
+	
 	//SolarSystem
 
 	/*std::cout << "Write spheres LOD: ";
@@ -66,7 +66,7 @@ int main()
 		break;
 	}*/
 
-	SolarSys.Initialize(14);
+	SolarSys.Initialize(214);
 
 	SolarSys.PrepareResources();
 

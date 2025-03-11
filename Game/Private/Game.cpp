@@ -12,8 +12,8 @@ void Game::Initialize(UINT objCnt) {
 	input = new InputDevice(this);
 	hWindow = display->Init(hInstance, applicationName);
 
-	clientWidth = 640;
-	clientHeight = 480;
+	clientWidth = 1920;
+	clientHeight = 1080;
 	
 	D3D_FEATURE_LEVEL featureLevel[] = { D3D_FEATURE_LEVEL_11_1 };
 
@@ -59,10 +59,22 @@ void Game::Initialize(UINT objCnt) {
 
 			Vector3 color((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
 			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
+			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f)); 
+
+			color = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
+			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
+			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
+
+			color = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
+			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
+			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
+
+			color = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
+			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
 			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
 
 			objects.push_back(new GameComponent());
-			if (!(this->applicationName == L"SolarSys"))
+			if (!(this->applicationName == L"SolarSys") || i >= objCnt - 200)
 				objects[i]->Initialize(device, meshes[i]);
 			else
 				objects[i]->Initialize(device, meshes[i], colors, LOD);

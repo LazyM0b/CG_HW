@@ -69,7 +69,7 @@ LRESULT CALLBACK DisplayWin32::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, 
 	}
 }
 
-DisplayWin32::DisplayWin32(): clientWidth(800), clientHeight(800) {};
+DisplayWin32::DisplayWin32(): clientWidth(1920), clientHeight(1080) {};
 
 HWND DisplayWin32::Init(HINSTANCE hInst, LPCWSTR appName) {
 
@@ -111,7 +111,7 @@ HWND DisplayWin32::Init(HINSTANCE hInst, LPCWSTR appName) {
 	SetForegroundWindow(hWindow);
 	SetFocus(hWindow);
 
-	ShowCursor(true);
+	ShowCursor(false);
 
 	return hWindow;
 }

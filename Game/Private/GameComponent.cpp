@@ -41,6 +41,27 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 			indeces.push_back((i + 1) % pointsCnt);
 			indeces.push_back(i);
 		}
+	case Cube:
+		pointsCnt = 8;
+		points = {
+			{Vector4(-1.0f, 1.0f, -1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(1.0f, 1.0f, -1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-1.0f, 1.0f, 1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(1.0f, 1.0f, 1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-1.0f, -1.0f, 1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(1.0f, -1.0f, 1.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)}
+		};
+		indeces = {
+			0,1,2, 1,3,2,
+			0,5,1, 0,4,5,
+			1,5,7, 1,7,3,
+			0,6,4, 0,2,6,
+			4,6,5, 5,6,7,
+			2,3,6, 3,7,6
+		};
+		break;
 	default:
 		break;
 	}
@@ -92,6 +113,27 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 			indeces.push_back(i);
 		}
 		break;
+	case Cube:
+		pointsCnt = 8;
+		points = {
+			{Vector4(-1.0f, 1.0f, -1.0f, 1.0f), colors[0]},
+			{Vector4(1.0f, 1.0f, -1.0f, 1.0f), colors[1]},
+			{Vector4(-1.0f, -1.0f, -1.0f, 1.0f), colors[2]},
+			{Vector4(1.0f, -1.0f, -1.0f, 1.0f), colors[3]},
+			{Vector4(-1.0f, 1.0f, 1.0f, 1.0f), colors[4]},
+			{Vector4(1.0f, 1.0f, 1.0f, 1.0f), colors[5]},
+			{Vector4(-1.0f, -1.0f, 1.0f, 1.0f), colors[6]},
+			{Vector4(1.0f, -1.0f, 1.0f, 1.0f), colors[7]}
+		};
+		indeces = {
+			0,1,2, 1,3,2,
+			0,5,1, 0,4,5,
+			1,5,7, 1,7,3,
+			0,6,4, 0,2,6,
+			4,6,5, 5,6,7,
+			2,3,6, 3,7,6
+		};
+		break;
 	case Sphere:
 
 		pointsCnt = 12;
@@ -130,22 +172,8 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 void GameComponent::Draw(ID3D11DeviceContext* context) {
 
 	TriangleComponent::Draw(context);
-	switch (type)
-	{
-	case Triangle:
-		context->DrawIndexed(indeces.size(), 0, 0);
-		break;
-	case Square:
-		context->DrawIndexed(indeces.size(), 0, 0);
-		break;
-	case Circle:
-		context->DrawIndexed(indeces.size(), 0, 0);
-		break;
-	case Sphere:
-		context->DrawIndexed(indeces.size(), 0, 0);
-	default:
-		break;
-	}
+
+	context->DrawIndexed(indeces.size(), 0, 0);
 }
 
 void GameComponent::Reload() {
