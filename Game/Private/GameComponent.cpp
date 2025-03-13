@@ -66,7 +66,7 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 		break;
 	}
 
-	collider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
+	boxCollider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
 	TriangleComponent::Initialize(device);
 }
 
@@ -165,15 +165,25 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 		break;
 	}
 
-	collider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
+	boxCollider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
+	TriangleComponent::Initialize(device);
+}
+
+
+void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vertex> vertices, std::vector<int> indices)
+{
+	this->type = type;
+	this->points = vertices;
+	this->indeces = indeces;
+
+	pointsCnt = points.size();
+
+	sphereCollider = DirectX::BoundingSphere(Vector3::Zero, 1.0f);
 	TriangleComponent::Initialize(device);
 }
 
 void GameComponent::Draw(ID3D11DeviceContext* context) {
-
 	TriangleComponent::Draw(context);
-
-	context->DrawIndexed(indeces.size(), 0, 0);
 }
 
 void GameComponent::Reload() {

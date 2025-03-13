@@ -70,7 +70,7 @@ void PongGame::Draw() {
 			}
 
 			for (int j = 0; j < i; ++j) {
-				if (objects[j]->collisionEnabled && circle->collider.Intersects(objects[j]->collider)) {
+				if (objects[j]->collisionEnabled && circle->boxCollider.Intersects(objects[j]->boxCollider)) {
 					float circleAngle = atan2(sin(circle->rotation.ToEuler().z), -cos(circle->rotation.ToEuler().z));
 
 					if (objects[j]->translation.y - circle->translation.y < 0)
@@ -98,7 +98,7 @@ void PongGame::Draw() {
 		
 
 		if (objects[i]->collisionEnabled) {
-			objects[i]->collider.Center = objects[i]->translation;
+			objects[i]->boxCollider.Center = objects[i]->translation;
 		}
 
 		context->VSSetConstantBuffers(0, 1, &objects[i]->worldPosBuffer);
@@ -157,8 +157,8 @@ void PongGame::ResetGame()
 			}
 
 			objects[i]->collisionEnabled = true;
-			objects[i]->collider.Extents = Vector3(objects[i]->scale.y, objects[i]->scale.x, objects[i]->scale.z);
-			objects[i]->collider.Center = objects[i]->translation;
+			objects[i]->boxCollider.Extents = Vector3(objects[i]->scale.y, objects[i]->scale.x, objects[i]->scale.z);
+			objects[i]->boxCollider.Center = objects[i]->translation;
 		}
 	}
 }

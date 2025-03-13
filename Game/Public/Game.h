@@ -5,6 +5,7 @@
 #include <chrono>
 #include <vector>
 #include <iostream>
+#include <DDSTextureLoader.h>
 
 #include "DisplayWin32.h"
 #include "ShadersComponent.h"
@@ -56,6 +57,8 @@ public:
 	ID3D11Texture2D* depthStencilBuffer;
 	ID3D11RenderTargetView* renderView;
 	ID3D11DepthStencilView* depthStencilView; 
+	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
 
 	CameraManager* camManager;
 	Matrix projectionMatrix;

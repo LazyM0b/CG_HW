@@ -56,4 +56,6 @@ void TriangleComponent::Draw(ID3D11DeviceContext* context)
 	context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &strides, &offsets);
+
+	context->DrawIndexed(indeces.size(), 0, 0);
 }

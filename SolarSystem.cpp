@@ -17,6 +17,7 @@ void SolarSystem::Initialize(UINT objCnt) {
 
 void SolarSystem::Draw()
 {
+
 	float color[] = { 0.1, 0.1f, 0.2f, 1.0f };
 	context->ClearRenderTargetView(renderView, color);
 	shaders->Draw(context);
@@ -42,37 +43,20 @@ void SolarSystem::Draw()
 
 	for (int i = 0; i < objects.size(); ++i) {
 
-		if (i != 0 && i < objects.size() - 200)
-			objects[i]->parent = objects[0];
-		if (i == 4 || i == 8 || i == 9)
-			objects[i]->parent = objects[i - 1];
-
 		//planets rotation
 		objects[i]->rotation = Quaternion::CreateFromAxisAngle(Vector3(0.0f, 1.0f, 0.0f), objects[i]->rotation.ToEuler().y + objects[i]->speed);
 
 		//world position calculation
-		if (objects[i]->parent != nullptr) {
-			float dist;
-
-			//satellite distance from parent planet
-			dist = objects[i]->scale.x * 6;
-
-			//planet distance from sun
-			if (objects[i]->parent == objects[0])
-				dist = objects[i]->scale.x * i * 3;
-
+		if (objects[i]->parent != nullptr) 
 			//orbital movement
-			objects[i]->translation = objects[i]->parent->translation + Vector3(cos(objects[i]->rotation.ToEuler().y + objects[i]->period) * dist, 0.0f, sin(objects[i]->rotation.ToEuler().y + objects[i]->period) * dist);
+			objects[i]->translation = objects[i]->parent->translation + Vector3(cos(objects[i]->rotation.ToEuler().y + objects[i]->period) * objects[i]->distanceToParent, 0.0f, sin(objects[i]->rotation.ToEuler().y + objects[i]->period) * objects[i]->distanceToParent);
 
-			objects[i]->positionL = Matrix::CreateScale(objects[i]->scale);
-			objects[i]->positionL *= Matrix::CreateFromYawPitchRoll(objects[i]->rotation.ToEuler() + objects[i]->parent->rotation.ToEuler());
-			objects[i]->positionL *= Matrix::CreateTranslation(objects[i]->translation);
-		}
-		else {
-			objects[i]->positionL = Matrix::CreateScale(objects[i]->scale);
-			objects[i]->positionL *= Matrix::CreateFromYawPitchRoll(objects[i]->rotation.ToEuler());
-			objects[i]->positionL *= Matrix::CreateTranslation(objects[i]->translation);
-		}
+		objects[i]->positionL = Matrix::CreateScale(objects[i]->scale);
+		Vector3 rotation = objects[i]->rotation.ToEuler();
+		if (objects[i]->parent != nullptr)
+			rotation += objects[i]->parent->rotation.ToEuler();
+		objects[i]->positionL *= Matrix::CreateFromYawPitchRoll(rotation);
+		objects[i]->positionL *= Matrix::CreateTranslation(objects[i]->translation);
 
 		if (i == planetToTrack) {
 
@@ -94,7 +78,7 @@ void SolarSystem::Draw()
 
 
 		if (objects[i]->collisionEnabled)
-			objects[i]->collider.Center = objects[i]->translation;
+			objects[i]->boxCollider.Center = objects[i]->translation;
 
 		context->VSSetConstantBuffers(0, 1, &objects[i]->worldPosBuffer);
 		context->Map(objects[i]->worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
@@ -128,6 +112,17 @@ void SolarSystem::ResetGame()
 			objects[i]->translation = Vector3(i * 7500.0f, 2000.0f, 0.0f);
 			objects[i]->period = rand() % 600 / 100.0f;
 			objects[i]->speed = rand() % 100 / 10000.0f;
+
+			if (i != 0) {
+				objects[i]->parent = objects[0];
+				objects[i]->distanceToParent = objects[i]->scale.x * i * 3;
+			}
+
+			if (i == 4 || i == 8 || i == 9) {
+				objects[i]->parent = objects[i - 1];
+				objects[i]->speed *= rand() % 5 + 2;
+				objects[i]->distanceToParent = objects[i]->scale.x * (rand() % 3 + 3.0f);
+			}
 		}
 		else {
 			if (i < objects.size() - 100) {
@@ -198,8 +193,7 @@ void SolarSystem::SwitchPlanet() {
 
 	if (keyNum == -1) {
 		planetToTrack = -1;
-		camManager->SetViewMatrix(Vector3(0.0f, 2000.0f, 0.0f), Vector3::Forward, Quaternion(0.0f, 0.0f, 0.0f, 0.0f));
-		camManager->UpdatePos(input);
+		camManager->SetViewMatrix(Vector3(0.0f, 2000.0f, -2000.0f), Vector3::Forward, Quaternion::CreateFromAxisAngle(Vector3(0.0f, 1.0f, 0.0f), asin(0.0f)));
 	}
 	else if (keyNum > 0 && keyNum - 48 != planetToTrack) {
 		planetToTrack = keyNum - 48;

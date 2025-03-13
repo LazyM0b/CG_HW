@@ -13,5 +13,5 @@ public:
 	void ResetGame();
 	void SwitchPlanet();
 
-	int planetToTrack = 8;
+	int planetToTrack = 1;
 };

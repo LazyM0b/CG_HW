@@ -1,12 +1,7 @@
 #include "PongGame.h"
 #include "FiveSquares.h"
 #include "SolarSystem.h"
-
-
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "dxguid.lib")
+#include "Katamari.h"
 
 int main()
 {
@@ -14,6 +9,7 @@ int main()
 	LPCWSTR applicationName1 = L"Squares";
 	LPCWSTR applicationName2 = L"Pong";
 	LPCWSTR applicationName3 = L"SolarSys";
+	LPCWSTR applicationName4 = L"Katamari";
 	UINT programNum;
 
 	/*std::cout << "Choose the program, that you want to be executed:\n1. Just 5 squares with wasd control and switch on digits\n2. Pong game\n3. Solar system model (not actual solar system) \nProgram: ";
@@ -35,7 +31,9 @@ int main()
 
 	std::cin >> CurrentGame.LOD;*/
 
-	SolarSystem SolarSys(hinst, applicationName3);
+	//SolarSystem SolarSys(hinst, applicationName3);
+
+	Katamari Katamari(hinst, applicationName4);
 
 	//
 
@@ -66,10 +64,19 @@ int main()
 		break;
 	}*/
 
-	SolarSys.Initialize(214);
+
+	//Lab 3
+	/*SolarSys.Initialize(214);
 
 	SolarSys.PrepareResources();
 
-	SolarSys.Run();
+	SolarSys.Run();*/
+
+	//Lab 4
+	Katamari.Initialize(1);
+
+	Katamari.PrepareResources();
+
+	Katamari.Run();
 
 }

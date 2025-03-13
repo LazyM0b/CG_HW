@@ -74,10 +74,15 @@ void Game::Initialize(UINT objCnt) {
 			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
 
 			objects.push_back(new GameComponent());
-			if (!(this->applicationName == L"SolarSys") || i >= objCnt - 200)
+
+			if (meshes[i] == Cube)
 				objects[i]->Initialize(device, meshes[i]);
-			else
+			if (this->applicationName == L"Katamari")
+				objects[i]->Initialize(device, meshes[i], objects[i]->points, objects[i]->indeces);
+			else if (this->applicationName == L"SolarSys")
 				objects[i]->Initialize(device, meshes[i], colors, LOD);
+			else
+				objects[i]->Initialize(device, meshes[i]);
 		}
 	}
 	else exit(1);
@@ -112,6 +117,9 @@ void Game::PrepareResources() {
 	res = device->CreateTexture2D(&depthStencilDesc, 0, &depthStencilBuffer);
 	res = device->CreateDepthStencilView(depthStencilBuffer, 0, &depthStencilView);
 	context->OMSetRenderTargets(1, &renderView, depthStencilView);
+
+	
+	DirectX::CreateDDSTextureFromFile(device.Get(), L"let_it_die.jpg", resource.GetAddressOf(), m_texture.ReleaseAndGetAddressOf());
 }
 
 void Game::Run() {

@@ -4,6 +4,10 @@
 #include "DirectXCollision.h"
 #include "SimpleMath.h"
 #include "DisplayWin32.h"
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
+//#include "assimp/scene.h"
+
 
 using namespace DirectX::SimpleMath;
 
@@ -23,6 +27,7 @@ public:
 	GameComponent();
 	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type);
 	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vector4> colors, UINT detailsLVL);
+	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vertex> vertices, std::vector<int> indices);
 	void Draw(ID3D11DeviceContext* context);
 	void Reload();
 	void Update();
@@ -37,9 +42,11 @@ public:
 	bool isPlayerControllable = false;
 	UINT pointsCnt;
 	MeshTypes type = Triangle;
-	DirectX::BoundingBox collider;
+	DirectX::BoundingBox boxCollider;
+	DirectX::BoundingSphere sphereCollider;
 	float speed = 0.0f;
 	float period;
+	float distanceToParent;
 	Vector3 scale;
 	Quaternion rotation;
 	Vector3 translation;
