@@ -31,9 +31,7 @@ int main()
 
 	std::cin >> CurrentGame.LOD;*/
 
-	//SolarSystem SolarSys(hinst, applicationName3);
 
-	Katamari Katamari(hinst, applicationName4);
 
 	//
 
@@ -66,17 +64,20 @@ int main()
 
 
 	//Lab 3
-	/*SolarSys.Initialize(214);
+	SolarSystem SolarSys(hinst, applicationName3);
+	SolarSys.Initialize(214);
 
 	SolarSys.PrepareResources();
 
-	SolarSys.Run();*/
+	SolarSys.Run();
 
 	//Lab 4
-	Katamari.Initialize(3);
+	/*Katamari Katamari(hinst, applicationName4);
+
+	Katamari.Initialize(2);
 
 	Katamari.PrepareResources();
 
-	Katamari.Run();
+	Katamari.Run();*/
 
 }

@@ -205,8 +205,8 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 {
 	this->type = type;
 
-	if (!this->LoadModel(filePath))
-		return;
+	/*if (!this->LoadModel(filePath))
+		return;*/
 	//this->points = vertices;
 	//this->indeces = indeces;
 
@@ -314,60 +314,60 @@ int GameComponent::CheckForUnique(const std::vector<Vertex>& points, Vertex poin
 }
 
 
-bool GameComponent::LoadModel(const std::string& filePath)
-{
-	Assimp::Importer importer;
-
-	const aiScene* pScene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
-
-	if (pScene == NULL)
-		return false;
-
-	this->ProcessNode(pScene->mRootNode, pScene);
-
-	return true;
-}
-
-
-void GameComponent::ProcessNode(aiNode* node, const aiScene* scene)
-{
-	for (int i = 0; i < node->mNumMeshes; ++i) {
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(this->ProcessMesh(mesh, scene));
-	}
-
-	for (int i = 0; i < node->mNumChildren; ++i)
-		this->ProcessNode(node->mChildren[i], scene);
-}
-
-
-TriangleComponent* GameComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
-{
-	TriangleComponent* object = new TriangleComponent();
-	for (int i = 0; i < mesh->mNumVertices; ++i) {
-		Vertex vertex;
-		vertex.location.x = mesh->mVertices[i].x;
-		vertex.location.y = mesh->mVertices[i].y;
-		vertex.location.z = mesh->mVertices[i].z;
-		vertex.location.w = 1.0f;
-
-		if (mesh->mTextureCoords[0]) {
-			vertex.texCoord.x = (float)mesh->mTextureCoords[0][i].x;
-			vertex.texCoord.y = (float)mesh->mTextureCoords[0][i].y;
-		}
-
-		object->points.push_back(vertex);
-	}
-
-	for (int i = 0; i < mesh->mNumFaces; ++i) {
-		aiFace face = mesh->mFaces[i];
-
-		for (int j = 0; j < face.mNumIndices; ++j)
-			object->indeces.push_back(face.mIndices[j]);
-	}
-
-	return object;
-}
+//bool GameComponent::LoadModel(const std::string& filePath)
+//{
+//	Assimp::Importer importer;
+//
+//	const aiScene* pScene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+//
+//	if (pScene == NULL)
+//		return false;
+//
+//	this->ProcessNode(pScene->mRootNode, pScene);
+//
+//	return true;
+//}
+//
+//
+//void GameComponent::ProcessNode(aiNode* node, const aiScene* scene)
+//{
+//	for (int i = 0; i < node->mNumMeshes; ++i) {
+//		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+//		meshes.push_back(this->ProcessMesh(mesh, scene));
+//	}
+//
+//	for (int i = 0; i < node->mNumChildren; ++i)
+//		this->ProcessNode(node->mChildren[i], scene);
+//}
+//
+//
+//TriangleComponent* GameComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+//{
+//	TriangleComponent* object = new TriangleComponent();
+//	for (int i = 0; i < mesh->mNumVertices; ++i) {
+//		Vertex vertex;
+//		vertex.location.x = mesh->mVertices[i].x;
+//		vertex.location.y = mesh->mVertices[i].y;
+//		vertex.location.z = mesh->mVertices[i].z;
+//		vertex.location.w = 1.0f;
+//
+//		if (mesh->mTextureCoords[0]) {
+//			vertex.texCoord.x = (float)mesh->mTextureCoords[0][i].x;
+//			vertex.texCoord.y = (float)mesh->mTextureCoords[0][i].y;
+//		}
+//
+//		object->points.push_back(vertex);
+//	}
+//
+//	for (int i = 0; i < mesh->mNumFaces; ++i) {
+//		aiFace face = mesh->mFaces[i];
+//
+//		for (int j = 0; j < face.mNumIndices; ++j)
+//			object->indeces.push_back(face.mIndices[j]);
+//	}
+//
+//	return object;
+//}
 
 void GameComponent::PointNormalize(Vertex& point)
 {	float tmp = std::sqrt(std::pow(point.location.x, 2) + std::pow(point.location.y, 2) + std::pow(point.location.z, 2));	point.location.x /= tmp;	point.location.y /= tmp;	point.location.z /= tmp;

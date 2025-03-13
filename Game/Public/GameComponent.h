@@ -4,9 +4,9 @@
 #include "DirectXCollision.h"
 #include "SimpleMath.h"
 #include "DisplayWin32.h"
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
+//#include <assimp/Importer.hpp>
+//#include <assimp/postprocess.h>
+//#include <assimp/scene.h>
 
 
 using namespace DirectX::SimpleMath;
@@ -36,9 +36,9 @@ public:
 	void SphereSubdivide(std::vector<Vertex>& points, std::vector<int>& indeces);
 	Vector4 findCenter(const Vector4& point1, const Vector4& point2);
 	int CheckForUnique(const std::vector<Vertex>& points, Vertex pointNew, int startInd);
-	bool LoadModel(const std::string& filePath);
+	/*bool LoadModel(const std::string& filePath);
 	void ProcessNode(aiNode* node, const aiScene* scene);
-	TriangleComponent* ProcessMesh(aiMesh* mesh, const aiScene* scene);
+	TriangleComponent* ProcessMesh(aiMesh* mesh, const aiScene* scene);*/
 
 
 	bool collisionEnabled = false;
