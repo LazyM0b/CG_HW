@@ -106,18 +106,18 @@ void PongGame::Draw() {
 
 
 		auto dataPtr = reinterpret_cast<float*>(res.pData);
-		memcpy(dataPtr, &objects[i]->positionW, sizeof(objects[i]->positionW));
+		memcpy(dataPtr, &objects[i]->positionL, sizeof(objects[i]->positionW));
 
 		context->Unmap(objects[i]->worldPosBuffer, 0);
 
-		context->VSSetConstantBuffers(1, 1, &objects[i]->localPosBuffer);
+		/*context->VSSetConstantBuffers(1, 1, &objects[i]->localPosBuffer);
 		context->Map(objects[i]->localPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
 
 
 		dataPtr = reinterpret_cast<float*>(res.pData);
 		memcpy(dataPtr, &objects[i]->positionL, sizeof(objects[i]->positionL));
 
-		context->Unmap(objects[i]->localPosBuffer, 0);
+		context->Unmap(objects[i]->localPosBuffer, 0);*/
 
 		objects[i]->Draw(context);
 

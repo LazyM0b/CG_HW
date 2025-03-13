@@ -73,7 +73,7 @@ int main()
 	SolarSys.Run();*/
 
 	//Lab 4
-	Katamari.Initialize(1);
+	Katamari.Initialize(3);
 
 	Katamari.PrepareResources();
 

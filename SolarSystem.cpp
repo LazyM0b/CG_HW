@@ -72,9 +72,9 @@ void SolarSystem::Draw()
 		}
 
 		//projection view calculation
-		objects[i]->positionL *= camManager->viewMatrix;
-		objects[i]->positionL *= projectionMatrix;
-		objects[i]->positionL = objects[i]->positionL.Transpose();
+		objects[i]->positionW = objects[i]->positionL * camManager->viewMatrix;
+		objects[i]->positionW *= projectionMatrix;
+		objects[i]->positionW = objects[i]->positionW.Transpose();
 
 
 		if (objects[i]->collisionEnabled)
@@ -89,14 +89,14 @@ void SolarSystem::Draw()
 
 		context->Unmap(objects[i]->worldPosBuffer, 0);
 
-		context->VSSetConstantBuffers(1, 1, &objects[i]->localPosBuffer);
+		/*context->VSSetConstantBuffers(1, 1, &objects[i]->localPosBuffer);
 		context->Map(objects[i]->localPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
 
 
 		dataPtr = reinterpret_cast<float*>(res.pData);
 		memcpy(dataPtr, &objects[i]->positionL, sizeof(objects[i]->positionL));
 
-		context->Unmap(objects[i]->localPosBuffer, 0);
+		context->Unmap(objects[i]->localPosBuffer, 0);*/
 
 		objects[i]->Draw(context);
 	}

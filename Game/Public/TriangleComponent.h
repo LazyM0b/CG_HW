@@ -11,6 +11,7 @@ using namespace DirectX::SimpleMath;
 struct Vertex {
 	Vector4 location;
 	Vector4 color;
+	Vector2 texCoord;
 };
 
 class TriangleComponent {
@@ -26,7 +27,7 @@ public:
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 	ID3D11Buffer* worldPosBuffer;
-	ID3D11Buffer* localPosBuffer;
+	//ID3D11Buffer* localPosBuffer;
 	UINT strides;
 	UINT offsets;
 };

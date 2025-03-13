@@ -53,9 +53,14 @@ void Game::Initialize(UINT objCnt) {
 		// Well, that was unexpected
 	}
 
+	std::vector<std::string> filePath;
+
+	filePath.push_back("../Objects/apple.fbx");
+
 	if (!meshes.empty()) {
 		for (int i = 0; i < objCnt; ++i) {
 			std::vector<Vector4> colors;
+
 
 			Vector3 color((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
 			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
@@ -75,14 +80,10 @@ void Game::Initialize(UINT objCnt) {
 
 			objects.push_back(new GameComponent());
 
-			if (meshes[i] == Cube)
-				objects[i]->Initialize(device, meshes[i]);
-			if (this->applicationName == L"Katamari")
-				objects[i]->Initialize(device, meshes[i], objects[i]->points, objects[i]->indeces);
-			else if (this->applicationName == L"SolarSys")
+			if (meshes[i] != Mesh)
 				objects[i]->Initialize(device, meshes[i], colors, LOD);
 			else
-				objects[i]->Initialize(device, meshes[i]);
+				objects[i]->Initialize(device, meshes[i], filePath[i]);
 		}
 	}
 	else exit(1);

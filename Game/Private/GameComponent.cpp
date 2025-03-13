@@ -3,8 +3,11 @@
 GameComponent::GameComponent() {}
 
 void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type) {
-
 	this->type = type;
+	float phi = (1.0f + sqrt(5.0f)) * 0.5f; // golden ratio
+	float coord1 = 1.0f;
+	float coord2 = 1.0f / phi;
+	int numSubdivide;
 
 	switch (type)
 	{
@@ -61,6 +64,33 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 			4,6,5, 5,6,7,
 			2,3,6, 3,7,6
 		};
+	break; 
+	case Sphere:
+
+		pointsCnt = 12;
+		numSubdivide = 3;
+
+		points =
+		{
+			{Vector4(0.0f, coord2, -coord1, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(coord2, coord1, 0.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-coord2, coord1, 0.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(0.0f, coord2, coord1, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(0.0f, -coord2, coord1, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-coord1, 0.0f, coord2, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(0.0f, -coord2, -coord1, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(coord1, 0.0f, -coord2, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(coord1, 0.0f, coord2, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-coord1, 0.0f, -coord2, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(coord2, -coord1, 0.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)},
+			{Vector4(-coord2, -coord1, 0.0f, 1.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f)}
+		};		indeces =
+		{
+		2,1,0, 1,2,3, 5,4,3, 4,8,3, 7,6,0,
+		6,9,0, 11,10,4, 10,11,6, 9,5,2, 5,9,11,
+		8,7,1, 7,8,10, 2,5,3, 8,1,3, 9,2,0,
+		1,7,0, 11,9,6, 7,10,6, 5,11,4, 10,8,4
+		};		for (int j = 0; j < numSubdivide; ++j) {			SphereSubdivide(points, indeces);			pointsCnt = points.size();			for (int i = 0; i < pointsCnt; ++i)				PointNormalize(points[i]);		}
 		break;
 	default:
 		break;
@@ -166,15 +196,19 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 	}
 
 	boxCollider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
+	sphereCollider = DirectX::BoundingSphere(Vector3::Zero, 1.0f);
 	TriangleComponent::Initialize(device);
 }
 
 
-void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vertex> vertices, std::vector<int> indices)
+void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, const std::string& filePath)
 {
 	this->type = type;
-	this->points = vertices;
-	this->indeces = indeces;
+
+	if (!this->LoadModel(filePath))
+		return;
+	//this->points = vertices;
+	//this->indeces = indeces;
 
 	pointsCnt = points.size();
 
@@ -277,6 +311,62 @@ int GameComponent::CheckForUnique(const std::vector<Vertex>& points, Vertex poin
 			return i;
 	}
 	return -1;
+}
+
+
+bool GameComponent::LoadModel(const std::string& filePath)
+{
+	Assimp::Importer importer;
+
+	const aiScene* pScene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+
+	if (pScene == NULL)
+		return false;
+
+	this->ProcessNode(pScene->mRootNode, pScene);
+
+	return true;
+}
+
+
+void GameComponent::ProcessNode(aiNode* node, const aiScene* scene)
+{
+	for (int i = 0; i < node->mNumMeshes; ++i) {
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		meshes.push_back(this->ProcessMesh(mesh, scene));
+	}
+
+	for (int i = 0; i < node->mNumChildren; ++i)
+		this->ProcessNode(node->mChildren[i], scene);
+}
+
+
+TriangleComponent* GameComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+{
+	TriangleComponent* object = new TriangleComponent();
+	for (int i = 0; i < mesh->mNumVertices; ++i) {
+		Vertex vertex;
+		vertex.location.x = mesh->mVertices[i].x;
+		vertex.location.y = mesh->mVertices[i].y;
+		vertex.location.z = mesh->mVertices[i].z;
+		vertex.location.w = 1.0f;
+
+		if (mesh->mTextureCoords[0]) {
+			vertex.texCoord.x = (float)mesh->mTextureCoords[0][i].x;
+			vertex.texCoord.y = (float)mesh->mTextureCoords[0][i].y;
+		}
+
+		object->points.push_back(vertex);
+	}
+
+	for (int i = 0; i < mesh->mNumFaces; ++i) {
+		aiFace face = mesh->mFaces[i];
+
+		for (int j = 0; j < face.mNumIndices; ++j)
+			object->indeces.push_back(face.mIndices[j]);
+	}
+
+	return object;
 }
 
 void GameComponent::PointNormalize(Vertex& point)

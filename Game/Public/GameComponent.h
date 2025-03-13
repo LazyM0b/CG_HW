@@ -4,9 +4,9 @@
 #include "DirectXCollision.h"
 #include "SimpleMath.h"
 #include "DisplayWin32.h"
-#include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
-//#include "assimp/scene.h"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 
 using namespace DirectX::SimpleMath;
@@ -27,7 +27,7 @@ public:
 	GameComponent();
 	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type);
 	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vector4> colors, UINT detailsLVL);
-	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, std::vector<Vertex> vertices, std::vector<int> indices);
+	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, const std::string& filePath);
 	void Draw(ID3D11DeviceContext* context);
 	void Reload();
 	void Update();
@@ -36,6 +36,10 @@ public:
 	void SphereSubdivide(std::vector<Vertex>& points, std::vector<int>& indeces);
 	Vector4 findCenter(const Vector4& point1, const Vector4& point2);
 	int CheckForUnique(const std::vector<Vertex>& points, Vertex pointNew, int startInd);
+	bool LoadModel(const std::string& filePath);
+	void ProcessNode(aiNode* node, const aiScene* scene);
+	TriangleComponent* ProcessMesh(aiMesh* mesh, const aiScene* scene);
+
 
 	bool collisionEnabled = false;
 	bool isMovable = false;
@@ -53,6 +57,7 @@ public:
 	Vector3 velocity;
 	Matrix positionW;
 	Matrix positionL;
+	std::vector<TriangleComponent*> meshes;
 
 	GameComponent* parent;
 };

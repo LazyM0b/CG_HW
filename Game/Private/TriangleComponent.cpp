@@ -48,7 +48,7 @@ void TriangleComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device) 
 	constBufDesc.ByteWidth = sizeof(float) * 16;
 
 	device->CreateBuffer(&constBufDesc, 0, &worldPosBuffer);
-	device->CreateBuffer(&constBufDesc, 0, &localPosBuffer);
+	//device->CreateBuffer(&constBufDesc, 0, &localPosBuffer);
 }
 
 void TriangleComponent::Draw(ID3D11DeviceContext* context)

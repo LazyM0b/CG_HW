@@ -114,7 +114,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>D:\Projects\Visual Studio\CG_HW\packages\assimp\lib\Any;D:\Projects\Visual Studio\CG_HW\packages\assimp\lib\Any;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\Projects\Visual Studio\CG_HW\lib\Any;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>D:\Projects\Visual Studio\CG_HW\packages\assimp\lib\Any;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
@@ -161,7 +161,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Projects\Visual Studio\CG_HW\Game\Private;D:\Projects\Visual Studio\CG_HW\Shaders;D:\Projects\Visual Studio\CG_HW\Game\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Projects\Visual Studio\CG_HW\Game\Objects;D:\Projects\Visual Studio\CG_HW\Game\Private;D:\Projects\Visual Studio\CG_HW\Shaders;D:\Projects\Visual Studio\CG_HW\Game\Public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
