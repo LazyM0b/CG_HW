@@ -5,9 +5,9 @@ FiveSquares::FiveSquares(HINSTANCE hinst, LPCTSTR hwindow) : Game(hinst, hwindow
 void FiveSquares::Initialize(UINT objCnt)
 {
 	for (int i = 0; i < objCnt; ++i) {
-		meshes.push_back(Square);
+		objectTypes.push_back(Square);
 	}
-	Game::Initialize(objCnt);
+	Game::Initialize();
 
 	for (int i = 0; i < objCnt; ++i) {
 		objects[i]->isMovable = true;
@@ -77,7 +77,7 @@ void FiveSquares::Draw()
 		auto dataPtr = reinterpret_cast<float*>(res.pData);
 		memcpy(dataPtr, &data, sizeof(data));
 
-		objects[i]->Draw(context);
+		objects[i]->Draw(context, camManager);
 
 		context->Unmap(objects[i]->worldPosBuffer, 0);
 	}

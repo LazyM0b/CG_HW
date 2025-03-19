@@ -2,6 +2,30 @@
 
 GameComponent::GameComponent() {}
 
+
+GameComponent::GameComponent(Microsoft::WRL::ComPtr<ID3D11Device> device, const GameComponent& other)
+{
+	this->type = other.type;
+	this->points = other.points;
+	this->indeces = other.indeces;
+	this->collisionEnabled = other.collisionEnabled;
+	this->isMovable = other.isMovable;
+	this->pointsCnt = other.pointsCnt;
+
+	this->speed = other.speed;
+	this->speedMax = other.speedMax;
+	this->scale = other.scale;
+	this->rotation = other.rotation;
+	this->translation = other.translation;
+	this->velocity = other.velocity;
+
+	this->resource = other.resource;
+	this->m_texture = other.m_texture;
+	this->parent = other.parent;
+	this->distanceToParent = other.distanceToParent;
+	TriangleComponent::Initialize(device);
+}
+
 void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type) {
 	this->type = type;
 	float phi = (1.0f + sqrt(5.0f)) * 0.5f; // golden ratio
@@ -109,6 +133,14 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 
 	switch (type)
 	{
+	case Strip:
+		pointsCnt = 2;
+
+		points = {
+			{ Vector4(1.0f, 0.0f, 0.0f, 1.0f), colors[0] },
+			{ Vector4(-1.0f, 0.0f, 0.0f, 1.0f), colors[1] }
+		};
+		break;
 	case Triangle:
 		pointsCnt = 3;
 
@@ -201,23 +233,86 @@ void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, Mesh
 }
 
 
-void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, const std::string& filePath)
+void GameComponent::Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device, MeshTypes type, const std::string& modelPath, const wchar_t* texturePath)
 {
 	this->type = type;
 
-	/*if (!this->LoadModel(filePath))
-		return;*/
-	//this->points = vertices;
-	//this->indeces = indeces;
-
+	if (!this->LoadModel(modelPath)) {
+		std::cout << "Model not imported";
+		return;
+	}
 	pointsCnt = points.size();
 
+	Vector4 trans = Vector4::Zero;
+	for (int i = 0; i < pointsCnt; ++i) {
+		if (points[i].location.x < trans.x)
+			trans.x = points[i].location.x;
+		if (points[i].location.y < trans.y)
+			trans.y = points[i].location.y;
+		if (points[i].location.z < trans.z)
+			trans.z = points[i].location.z;
+	}
+
+	float dist = 0.0f;
+	for (int i = 0; i < pointsCnt; ++i) {
+		points[i].location -= trans;
+		if (Vector4::Distance(points[i].location, Vector4::Zero) > dist)
+			dist = Vector4::Distance(points[i].location, Vector4::Zero);
+	}
+
+	for (int i = 0; i < pointsCnt; ++i) {
+		points[i].location.x /= dist;
+		points[i].location.y /= dist;
+		points[i].location.z /= dist;
+	}
+
+	if (!this->LoadTexture(device, texturePath)) {
+		std::cout << "Texture not imported";
+		return;
+	}
+
+	boxCollider = DirectX::BoundingBox(Vector3::Zero, Vector3::One);
 	sphereCollider = DirectX::BoundingSphere(Vector3::Zero, 1.0f);
 	TriangleComponent::Initialize(device);
 }
 
-void GameComponent::Draw(ID3D11DeviceContext* context) {
-	TriangleComponent::Draw(context);
+void GameComponent::Draw(ID3D11DeviceContext* context, CameraManager* camManager) {
+
+	D3D11_MAPPED_SUBRESOURCE res = {};
+	Vector3 objRotation = this->rotation.ToEuler();
+	if (parent != nullptr)
+		objRotation += parent->rotation.ToEuler();
+
+	positionL = Matrix::CreateScale(scale);
+	positionL *= Matrix::CreateFromYawPitchRoll(objRotation);
+	positionL *= Matrix::CreateTranslation(translation);
+
+	//projection view calculation
+	positionW = positionL * camManager->viewMatrix;
+	positionW *= camManager->projectionMatrix;
+	positionW = positionW.Transpose();
+
+
+	if (collisionEnabled) {
+		boxCollider.Center = translation;
+		sphereCollider.Center = translation;
+	}
+	context->VSSetConstantBuffers(0, 1, &worldPosBuffer);
+	context->Map(worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+
+
+	auto dataPtr = reinterpret_cast<float*>(res.pData);
+	memcpy(dataPtr, &positionW, sizeof(positionW));
+
+	context->Unmap(worldPosBuffer, 0);
+
+	if (type == Strip)
+		TriangleComponent::DrawLine(context);
+	else {
+		if (m_texture != nullptr)
+			context->PSSetShaderResources(0, 1, m_texture.GetAddressOf());
+		TriangleComponent::DrawTriangle(context);
+	}
 }
 
 void GameComponent::Reload() {
@@ -314,60 +409,72 @@ int GameComponent::CheckForUnique(const std::vector<Vertex>& points, Vertex poin
 }
 
 
-//bool GameComponent::LoadModel(const std::string& filePath)
-//{
-//	Assimp::Importer importer;
-//
-//	const aiScene* pScene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
-//
-//	if (pScene == NULL)
-//		return false;
-//
-//	this->ProcessNode(pScene->mRootNode, pScene);
-//
-//	return true;
-//}
-//
-//
-//void GameComponent::ProcessNode(aiNode* node, const aiScene* scene)
-//{
-//	for (int i = 0; i < node->mNumMeshes; ++i) {
-//		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-//		meshes.push_back(this->ProcessMesh(mesh, scene));
-//	}
-//
-//	for (int i = 0; i < node->mNumChildren; ++i)
-//		this->ProcessNode(node->mChildren[i], scene);
-//}
-//
-//
-//TriangleComponent* GameComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
-//{
-//	TriangleComponent* object = new TriangleComponent();
-//	for (int i = 0; i < mesh->mNumVertices; ++i) {
-//		Vertex vertex;
-//		vertex.location.x = mesh->mVertices[i].x;
-//		vertex.location.y = mesh->mVertices[i].y;
-//		vertex.location.z = mesh->mVertices[i].z;
-//		vertex.location.w = 1.0f;
-//
-//		if (mesh->mTextureCoords[0]) {
-//			vertex.texCoord.x = (float)mesh->mTextureCoords[0][i].x;
-//			vertex.texCoord.y = (float)mesh->mTextureCoords[0][i].y;
-//		}
-//
-//		object->points.push_back(vertex);
-//	}
-//
-//	for (int i = 0; i < mesh->mNumFaces; ++i) {
-//		aiFace face = mesh->mFaces[i];
-//
-//		for (int j = 0; j < face.mNumIndices; ++j)
-//			object->indeces.push_back(face.mIndices[j]);
-//	}
-//
-//	return object;
-//}
+bool GameComponent::LoadModel(const std::string& filePath)
+{
+	Assimp::Importer importer;
+
+	const aiScene* pScene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+
+	if (pScene == nullptr)
+		return false;
+
+	this->ProcessNode(pScene->mRootNode, pScene);
+
+	return true;
+}
+
+
+void GameComponent::ProcessNode(aiNode* node, const aiScene* scene)
+{
+	for (int i = 0; i < node->mNumMeshes; ++i) {
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		this->ProcessMesh(mesh, scene);
+	}
+
+	for (int i = 0; i < node->mNumChildren; ++i)
+		this->ProcessNode(node->mChildren[i], scene);
+}
+
+
+void GameComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+{
+	for (int i = 0; i < mesh->mNumVertices; ++i) {
+		Vertex vertex;
+		vertex.location.x = mesh->mVertices[i].x;
+		vertex.location.y = mesh->mVertices[i].y;
+		vertex.location.z = mesh->mVertices[i].z;
+		vertex.location.w = 1.0f;
+
+		if (mesh->mTextureCoords[0]) {
+			vertex.texCoord.x = (float)mesh->mTextureCoords[0][i].x;
+			vertex.texCoord.y = (float)mesh->mTextureCoords[0][i].y;
+		}
+
+		points.push_back(vertex);
+	}
+
+	for (int i = 0; i < mesh->mNumFaces; ++i) {
+		aiFace face = mesh->mFaces[i];
+
+		for (int j = 0; j < face.mNumIndices; ++j)
+			indeces.push_back(face.mIndices[j]);
+	}
+}
+
+
+bool GameComponent::LoadTexture(Microsoft::WRL::ComPtr<ID3D11Device> device, const wchar_t* texturePath)
+{
+	CD3D11_TEXTURE2D_DESC textureDesc(DXGI_FORMAT_R8G8B8A8_UNORM, 512, 512);
+
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, textureDesc.Format);
+
+	DirectX::CreateWICTextureFromFile(device.Get(), texturePath, resource.GetAddressOf(), m_texture.GetAddressOf());
+	//DebugBreak();
+	HRESULT hr = device->CreateShaderResourceView(resource.Get(), &srvDesc, m_texture.GetAddressOf());
+	if (hr == S_OK)
+		return true;
+	else return false;
+}
 
 void GameComponent::PointNormalize(Vertex& point)
 {	float tmp = std::sqrt(std::pow(point.location.x, 2) + std::pow(point.location.y, 2) + std::pow(point.location.z, 2));	point.location.x /= tmp;	point.location.y /= tmp;	point.location.z /= tmp;

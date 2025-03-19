@@ -4,11 +4,11 @@ PongGame::PongGame(HINSTANCE hinst, LPCTSTR hwindow): Game(hinst, hwindow) {}
 
 void PongGame::Initialize(UINT objCnt)
 {
+	Game::Initialize();
 	for (int i = 0; i < objCnt - 1; ++i)
-		meshes.push_back(Square);
-	meshes.push_back(Circle);
+		objectTypes.push_back(Square);
+	objectTypes.push_back(Circle);
 
-	Game::Initialize(objCnt);
 	for (int i = objCnt - 3; i < objCnt; ++i) {
 		objects[i]->isMovable = true;
 	}
@@ -18,11 +18,7 @@ void PongGame::Initialize(UINT objCnt)
 }
 
 void PongGame::Draw() {
-	float color[] = { 0.5, 0.5f, 0.5f, 1.0f };
-	context->ClearRenderTargetView(renderView, color);
-	shaders->Draw(context);
-
-	D3D11_MAPPED_SUBRESOURCE res = {};
+	Game::Draw();
 
 	GameComponent* circle = objects[objects.size() - 1];
 
@@ -66,7 +62,7 @@ void PongGame::Draw() {
 			}
 			else if (abs(circle->translation.y) + circle->scale.y >= 1) {
 				circle->rotation = Quaternion::CreateFromYawPitchRoll( 2 * Vector3(1.0f, 0.0f, 0.0f) * Vector3(XMVector3Dot(circle->rotation.ToEuler(), Vector3(1.0f, 0.0f, 0.0f))) - circle->rotation.ToEuler());
-				circle->velocity = Vector3(cos(circle->rotation.ToEuler().z) * circle->speed, sin(circle->rotation.ToEuler().z) * circle->speed, 0.0f);
+				circle->impulse = Vector3(cos(circle->rotation.ToEuler().z) * circle->speed, sin(circle->rotation.ToEuler().z) * circle->speed, 0.0f);
 			}
 
 			for (int j = 0; j < i; ++j) {
@@ -84,44 +80,16 @@ void PongGame::Draw() {
 						circle->speed /= 1 + sin(objects[j]->rotation.ToEuler().z) / 5;
 
 					circle->rotation = Quaternion::CreateFromAxisAngle( Vector3(0.0f, 0.0f, 1.0f), circleAngle);
-					circle->velocity = Vector3(cos(circle->rotation.ToEuler().z) * circle->speed, sin(circle->rotation.ToEuler().z) * circle->speed, 0.0f);
-					circle->translation += circle->velocity * 2;
+					circle->impulse = Vector3(cos(circle->rotation.ToEuler().z) * circle->speed, sin(circle->rotation.ToEuler().z) * circle->speed, 0.0f);
+					circle->translation += circle->impulse * 2;
 				}
 			}
-			circle->translation += circle->velocity;
+			circle->translation += circle->impulse;
 		}
-
-		objects[i]->positionL = Matrix::CreateScale(objects[i]->scale);
-		objects[i]->positionL *= Matrix::CreateFromYawPitchRoll(objects[i]->rotation.ToEuler());
-		objects[i]->positionL *= Matrix::CreateTranslation(objects[i]->translation);
-		objects[i]->positionL = objects[i]->positionL.Transpose();
-		
-
-		if (objects[i]->collisionEnabled) {
-			objects[i]->boxCollider.Center = objects[i]->translation;
-		}
-
-		context->VSSetConstantBuffers(0, 1, &objects[i]->worldPosBuffer);
-		context->Map(objects[i]->worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
-
-
-		auto dataPtr = reinterpret_cast<float*>(res.pData);
-		memcpy(dataPtr, &objects[i]->positionL, sizeof(objects[i]->positionW));
-
-		context->Unmap(objects[i]->worldPosBuffer, 0);
-
-		/*context->VSSetConstantBuffers(1, 1, &objects[i]->localPosBuffer);
-		context->Map(objects[i]->localPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
-
-
-		dataPtr = reinterpret_cast<float*>(res.pData);
-		memcpy(dataPtr, &objects[i]->positionL, sizeof(objects[i]->positionL));
-
-		context->Unmap(objects[i]->localPosBuffer, 0);*/
-
-		objects[i]->Draw(context);
 
 	}
+	for (auto object : objects)
+		object->Draw(context, camManager);
 }
 
 void PongGame::ShowScores()
@@ -146,7 +114,7 @@ void PongGame::ResetGame()
 				objects[i]->translation = Vector3::Zero;
 				float angle = std::rand() % 90 / 360.0f * 6.28f - 45.0f + 3.14f * float (std::rand() % 2);
 				objects[i]->rotation = Quaternion::CreateFromAxisAngle(Vector3(0.0f, 0.0f, 1.0f), angle);
-				objects[i]->velocity = Vector3(cos(objects[i]->rotation.ToEuler().z) * 0.02, sin(objects[i]->rotation.ToEuler().z) * 0.02, 0.0f);
+				objects[i]->impulse = Vector3(cos(objects[i]->rotation.ToEuler().z) * 0.02, sin(objects[i]->rotation.ToEuler().z) * 0.02, 0.0f);
 				objects[i]->speed = 0.02;
 			}
 			else {

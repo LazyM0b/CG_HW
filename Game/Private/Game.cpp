@@ -2,37 +2,38 @@
 
 Game* Game::instance = nullptr;
 
-Game::Game(HINSTANCE hInst, LPCWSTR appName): hInstance(hInst), applicationName(appName) {
-	display = new DisplayWin32();
+Game::Game(HINSTANCE hInst, LPCWSTR appName) : hInstance(hInst), applicationName(appName) {
+
+	clientWidth = 1920;
+	clientHeight = 1080;
+
+	display = new DisplayWin32(clientWidth, clientHeight);
 	instance = this;
 }
 
-void Game::Initialize(UINT objCnt) {
+void Game::Initialize() {
 
 	input = new InputDevice(this);
 	hWindow = display->Init(hInstance, applicationName);
 
-	clientWidth = 1920;
-	clientHeight = 1080;
 	
 	D3D_FEATURE_LEVEL featureLevel[] = { D3D_FEATURE_LEVEL_11_1 };
 
-	DXGI_SWAP_CHAIN_DESC swapDesc = {};
-	swapDesc.BufferDesc.Width = clientWidth;
-	swapDesc.BufferDesc.Height = clientHeight;
-	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
-	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
-	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapDesc.SampleDesc.Count = 1;
-	swapDesc.SampleDesc.Quality = 0;
-	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDesc.BufferCount = 3;
-	swapDesc.OutputWindow = hWindow;
-	swapDesc.Windowed = true;
-	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	swapDescriptor.BufferDesc.Width = clientWidth;
+	swapDescriptor.BufferDesc.Height = clientHeight;
+	swapDescriptor.BufferDesc.RefreshRate.Numerator = 60;
+	swapDescriptor.BufferDesc.RefreshRate.Denominator = 1;
+	swapDescriptor.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapDescriptor.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapDescriptor.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	swapDescriptor.SampleDesc.Count = 1;
+	swapDescriptor.SampleDesc.Quality = 0;
+	swapDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapDescriptor.BufferCount = 3;
+	swapDescriptor.OutputWindow = hWindow;
+	swapDescriptor.Windowed = true;
+	swapDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+	swapDescriptor.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	auto res = D3D11CreateDeviceAndSwapChain(
 		nullptr,
@@ -42,7 +43,7 @@ void Game::Initialize(UINT objCnt) {
 		featureLevel,
 		1,
 		D3D11_SDK_VERSION,
-		&swapDesc,
+		&swapDescriptor,
 		&swapChain,
 		&device,
 		nullptr,
@@ -53,46 +54,11 @@ void Game::Initialize(UINT objCnt) {
 		// Well, that was unexpected
 	}
 
-	std::vector<std::string> filePath;
-
-	filePath.push_back("../Objects/apple.fbx");
-
-	if (!meshes.empty()) {
-		for (int i = 0; i < objCnt; ++i) {
-			std::vector<Vector4> colors;
-
-
-			Vector3 color((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
-			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
-			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f)); 
-
-			color = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
-			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
-			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
-
-			color = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
-			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
-			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
-
-			color = Vector3((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f);
-			colors.push_back(Vector4(color.x, color.y, color.z, 1.0f));
-			colors.push_back(Vector4(color.z, color.y, color.x, 1.0f));
-
-			objects.push_back(new GameComponent());
-
-			if (meshes[i] != Mesh)
-				objects[i]->Initialize(device, meshes[i], colors, LOD);
-			else
-				objects[i]->Initialize(device, meshes[i], filePath[i]);
-		}
-	}
-	else exit(1);
-
 	shaders = new ShadersComponent();
 
 	shaders->Initialize(hWindow, device, context);
 
-	camManager = new CameraManager(2000.0f);
+	camManager = new CameraManager();
 }
 
 void Game::PrepareResources() {
@@ -118,9 +84,6 @@ void Game::PrepareResources() {
 	res = device->CreateTexture2D(&depthStencilDesc, 0, &depthStencilBuffer);
 	res = device->CreateDepthStencilView(depthStencilBuffer, 0, &depthStencilView);
 	context->OMSetRenderTargets(1, &renderView, depthStencilView);
-
-	
-	DirectX::CreateDDSTextureFromFile(device.Get(), L"let_it_die.jpg", resource.GetAddressOf(), m_texture.ReleaseAndGetAddressOf());
 }
 
 void Game::Run() {
@@ -209,27 +172,9 @@ void Game::Update(float deltaTime) {
 
 void Game::Draw() {
 
-	float color[] = { 0.5, 0.5f, 0.5f, 1.0f };
+	float color[] = { 0.1, 0.1f, 0.2f, 1.0f };
 	context->ClearRenderTargetView(renderView, color);
 	shaders->Draw(context);
-
-	D3D11_MAPPED_SUBRESOURCE res = {};
-	Matrix data;
-
-	for (int i = 0; i < objects.size(); ++i) {
-
-		context->VSSetConstantBuffers(0, 1, &objects[i]->worldPosBuffer);
-
-		context->Map(objects[i]->worldPosBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
-
-		auto dataPtr = reinterpret_cast<float*>(res.pData);
-		memcpy(dataPtr, &data, sizeof(data));
-
-		objects[i]->Draw(context);
-
-		context->Unmap(objects[i]->worldPosBuffer, 0);
-	}
-
 }
 
 void Game::RestoreTargets(int viewsCnt, ID3D11RenderTargetView* const* RenderView, ID3D11DepthStencilView* DepthStencilView) {

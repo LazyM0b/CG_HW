@@ -29,6 +29,7 @@
     <ClInclude Include="Game\Public\InputDevice.h" />
     <ClInclude Include="Game\Public\Katamari.h" />
     <ClInclude Include="Game\Public\Keys.h" />
+    <ClInclude Include="Game\Public\PlayerController.h" />
     <ClInclude Include="Game\Public\ShadersComponent.h" />
     <ClInclude Include="Game\Public\TriangleComponent.h" />
     <ClInclude Include="PongGame.h" />
@@ -45,6 +46,7 @@
     <ClCompile Include="Game\Private\GameTimer.cpp" />
     <ClCompile Include="Game\Private\InputDevice.cpp" />
     <ClCompile Include="Game\Private\Katamari.cpp" />
+    <ClCompile Include="Game\Private\PlayerController.cpp" />
     <ClCompile Include="Game\Private\ShadersComponent.cpp" />
     <ClCompile Include="Game\Private\TriangleComponent.cpp" />
     <ClCompile Include="PongGame.cpp" />

@@ -10,93 +10,100 @@ CameraManager::CameraManager(float dist)
 	cameraRotation = Quaternion::CreateFromAxisAngle(Vector3(1.0f, 0.0f, 0.0f), 0.0f);
 }
 
-void CameraManager::SetViewMatrix(Vector3 objPos, Vector3 camPos, Quaternion camRotation)
+void CameraManager::SetCameraView(Vector3 objPos, Vector3 camPos)
 {
 	objectPos = objPos;
-	distance = Vector3::Distance(camPos, objPos);
-	cameraRotation = camRotation;
 
-	cameraPos = Vector3::Transform(camPos, Matrix::CreateFromQuaternion(cameraRotation)) + objectPos;
+	cameraPos = Vector3::Transform(camPos, cameraRotation) + objectPos;
+	distance = Vector3::Distance(cameraPos, objectPos);
 
+	if (objectPos == cameraPos)
+		cameraPos.z -= 1.0f;
 	viewMatrix = Matrix::CreateLookAt(cameraPos, objectPos, Vector3::Up);
 }
 
 void CameraManager::RotateCamera(Quaternion rotVector)
 {
-	cameraRotation *= rotVector;
+	cameraRotation = rotVector;
 }
 
-void CameraManager::UpdatePos(InputDevice* input)
+void CameraManager::UpdatePos(InputDevice* input, const Vector3& objPos,UINT width, UINT height, Vector3* objVelocity)
 {
-	if (input->MouseWheelDelta != 0) {
-		camMoveSpeed = camMoveSpeed + input->MouseWheelDelta * 0.1f;
-		if (camMoveSpeed < 0.0f)
-			camMoveSpeed = 0.0f;
-	}
+	Vector3 camPos;
+	//updating free camera fly speed
+	objectPos = objPos;
 
-	forwardVector = objectPos - cameraPos;
+	forwardVector = cameraPos - objectPos;
 	forwardVector.Normalize();
 
-	//if (input->MouseOffset.x)
-	//RotateCamera(Quaternion::CreateFromAxisAngle(Vector3(0.0, 1.0, 0.0), acos(input->MouseOffset.x)));
+	if (!isStationary) {
+		if (cameraOffset == Vector3::Zero)
+			cameraOffset = Vector3::Right;
 
-	//if (input->MouseOffset.y)
-	//RotateCamera(Quaternion::CreateFromAxisAngle(Vector3(1.0, 0.0, 0.0), asin(input->MouseOffset.y)));
+		if (input->MouseOffset.x) {
+			cursorPos.x += input->MouseOffset.x * mouseMoveSpeed;
+			cameraOffset.x = cos((cursorPos.x * 6.28f) / (width / 2));
+			cameraOffset.z = sin((cursorPos.x * 6.28f) / (width / 2));
+			if (objVelocity != nullptr)
+				*objVelocity = Vector3(cos((cursorPos.x * 6.28f) / (width / 2)), 0.0f, sin((cursorPos.x * 6.28f) / (width / 2)));
+		}
+		if (input->MouseOffset.y) {
+			cursorPos.y -= input->MouseOffset.y * mouseMoveSpeed * 4;
+			if (cursorPos.y > float(height))
+				cursorPos.y = float(height);
+			else if (cursorPos.y < float(height) * -1)
+				cursorPos.y = float(height) * -1;
+			cameraOffset.y = sin(-1 * (cursorPos.y * 1.57f) / height);
+		}
+		input->MouseOffset = Vector2::Zero;
 
-	//float norm = sqrt(pow(input->MouseOffset.x, 2) + pow(input->MouseOffset.y, 2));
+		if (objectToTrack == -1) {
+			distance = 1.0f;
 
-	/*if (input->MouseOffset.x > 0 || input->MouseOffset.y > 0) {
-		cameraRotation *= tmp;
-		cameraRotation *= tmp1;
-	}*/
-	//else
-		//cameraRotation = Quaternion::CreateFromAxisAngle(Vector3::Zero, 0.0f);
+			if (input->MouseWheelDelta != 0) {
+				camMoveSpeed = camMoveSpeed + input->MouseWheelDelta * 0.1f;
+				if (camMoveSpeed < 0.0f)
+					camMoveSpeed = 0.0f;
+			}
 
+			float moveSpeed = camMoveSpeed;
 
-	/*if (input->MouseOffset.y > 0) 
-		objectPos.y += sin(input->MousePosition.y) * distance;*/
+			if (input->IsKeyDown(Keys::LeftShift))
+				moveSpeed *= 2;
 
-	if (input->MouseOffset.x) {
-		cursorPos.x += input->MouseOffset.x * mouseMoveSpeed;
-		cameraOffset.x = cos((cursorPos.x * 6.28f) / 800.0f);
-		cameraOffset.z = sin((cursorPos.x * 6.28f) / 800.0f);
+			if (input->IsKeyDown(Keys::W)) {
+				objectPos -= forwardVector * moveSpeed;
+			}
+			if (input->IsKeyDown(Keys::S)) {
+				objectPos += forwardVector * moveSpeed;
+			}
+			if (input->IsKeyDown(Keys::A)) {
+				objectPos.x += cos(asin(1.0f) + forwardVector.z) * moveSpeed;
+				objectPos.z += sin(acos(1.0f) + forwardVector.x) * moveSpeed;
+			}
+			if (input->IsKeyDown(Keys::D)) {
+				objectPos.x += cos(asin(-1.0f) + forwardVector.z) * moveSpeed;
+				objectPos.z += sin(acos(-1.0f) + forwardVector.x) * moveSpeed;
+			}
+			if (input->IsKeyDown(Keys::Q)) {
+				objectPos.y += moveSpeed;
+			}
+			if (input->IsKeyDown(Keys::E)) {
+				objectPos.y += moveSpeed * -1;
+			}
+		}
+		camPos = cameraOffset;
+		camPos.Normalize();
 	}
-	if (input->MouseOffset.y) {
-		cursorPos.y -= input->MouseOffset.y * 5;
-		if (cursorPos.y > 800)
-			cursorPos.y = 800;
-		else if (cursorPos.y < -800)
-			cursorPos.y = -800;
-		cameraOffset.y = sin(-1 * (cursorPos.y * 1.57f) / 800);
-	}
-	input->MouseOffset = Vector2::Zero;
+	else
+		camPos = forwardVector;
 
-	float moveSpeed = camMoveSpeed;
-
-	if (input->IsKeyDown(Keys::LeftShift))
-		moveSpeed *= 2;
-
-	if (input->IsKeyDown(Keys::W)) {
-		objectPos += forwardVector * moveSpeed;
-	}
-	if (input->IsKeyDown(Keys::S)) {
-		objectPos += forwardVector * -1.0f * moveSpeed;
-	}
-	if (input->IsKeyDown(Keys::A)) {
-		objectPos.x += cos(asin(1.0f) - forwardVector.z) * moveSpeed;
-		objectPos.z += sin(acos(1.0f) - forwardVector.x) * moveSpeed;
-	}
-	if (input->IsKeyDown(Keys::D)) {
-		objectPos.x += cos(asin(-1.0f) - forwardVector.z) * moveSpeed;
-		objectPos.z += sin(acos(-1.0f) - forwardVector.x) * moveSpeed;
-	}
-	if (input->IsKeyDown(Keys::Q)) {
-		objectPos.y += moveSpeed;
-	}
-	if (input->IsKeyDown(Keys::E)) {
-		objectPos.y += moveSpeed * -1;
-	}
-
-	SetViewMatrix(objectPos, cameraOffset, cameraRotation);
+	SetCameraView(objectPos, camPos * distance);
 }
 
+void CameraManager::Initialize(float aspectRatio, int FOV /*= 1.57f*/)
+{
+	float nearPlane = 0.5f;
+	float farPlane = 250000.0f;
+	projectionMatrix = Matrix::CreatePerspectiveFieldOfView(FOV, aspectRatio, nearPlane, farPlane);
+}

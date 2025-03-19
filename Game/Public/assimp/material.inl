@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include <limits>
+
 #ifdef __GNUC__
 #   pragma GCC system_header
 #endif
@@ -98,7 +100,7 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
             return AI_FAILURE;
         }
 
-        iNum = static_cast<unsigned int>(std::min(static_cast<size_t>(iNum),prop->mDataLength / sizeof(Type)));
+        iNum = static_cast<unsigned int>(static_cast<size_t>(iNum) > prop->mDataLength / sizeof(Type) ? prop->mDataLength / sizeof(Type) : static_cast<size_t>(iNum));
         ::memcpy(pOut,prop->mData,iNum * sizeof(Type));
         if (pMax) {
             *pMax = iNum;

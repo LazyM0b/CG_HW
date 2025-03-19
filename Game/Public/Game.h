@@ -5,13 +5,13 @@
 #include <chrono>
 #include <vector>
 #include <iostream>
-#include <DDSTextureLoader.h>
 
 #include "DisplayWin32.h"
 #include "ShadersComponent.h"
 #include "GameComponent.h"
 #include "InputDevice.h"
 #include "CameraManager.h"
+#include "PlayerController.h"
 #include "SimpleMath.h"
 #include "Math.h"
 #include "conio.h"
@@ -24,7 +24,7 @@ public:
 
 	Game();
 	Game(HINSTANCE hinst, LPCWSTR appName);
-	virtual void Initialize(UINT objCnt); // done
+	virtual void Initialize(); // done
 	void PrepareResources(); // done
 	int MessageHandler(UINT msg); //?
 	void Run();
@@ -46,7 +46,7 @@ public:
 	static Game* instance;
 
 	std::vector<GameComponent*> objects;
-	std::vector<MeshTypes> meshes;
+	std::vector<MeshTypes> objectTypes;
 	ShadersComponent* shaders;
 	InputDevice* input;
 
@@ -57,11 +57,9 @@ public:
 	ID3D11Texture2D* depthStencilBuffer;
 	ID3D11RenderTargetView* renderView;
 	ID3D11DepthStencilView* depthStencilView; 
-	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
 
 	CameraManager* camManager;
-	Matrix projectionMatrix;
+	PlayerController* controller;
 	//GameTimer timer;
 
 	std::chrono::time_point<std::chrono::steady_clock> PrevTime;

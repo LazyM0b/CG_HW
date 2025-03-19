@@ -64,20 +64,20 @@ int main()
 
 
 	//Lab 3
-	SolarSystem SolarSys(hinst, applicationName3);
+	/*SolarSystem SolarSys(hinst, applicationName3);
 	SolarSys.Initialize(214);
 
 	SolarSys.PrepareResources();
 
-	SolarSys.Run();
+	SolarSys.Run();*/
 
 	//Lab 4
-	/*Katamari Katamari(hinst, applicationName4);
+	Katamari Katamari(hinst, applicationName4);
 
-	Katamari.Initialize(2);
+	Katamari.Initialize(250);
 
 	Katamari.PrepareResources();
 
-	Katamari.Run();*/
+	Katamari.Run();
 
 }

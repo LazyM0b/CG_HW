@@ -14,14 +14,26 @@ struct Vertex {
 	Vector2 texCoord;
 };
 
+enum MeshTypes
+{
+	Strip,
+	Triangle,
+	Square,
+	Circle,
+	Cube,
+	Sphere,
+	Mesh
+};
+
 class TriangleComponent {
 public:
 
 	TriangleComponent();
 	void Initialize(Microsoft::WRL::ComPtr<ID3D11Device> device);
-	void Draw(ID3D11DeviceContext* context);
+	void DrawTriangle(ID3D11DeviceContext* context);
+	void DrawLine(ID3D11DeviceContext* context);
 
-
+	MeshTypes type;
 	std::vector <Vertex> points;
 	std::vector <int> indeces;
 	ID3D11Buffer* vertexBuffer;

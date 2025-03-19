@@ -8,7 +8,7 @@ using namespace DirectX::SimpleMath;
 class PongGame : public Game {
 public:
 	PongGame(HINSTANCE hinst, LPCTSTR hwindow);
-	void Initialize(UINT objCnt) override;
+	void Initialize(UINT objCnt);
 	void Draw() override;
 	void ShowScores();
 	void ResetGame();
