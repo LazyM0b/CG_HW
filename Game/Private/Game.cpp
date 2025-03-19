@@ -4,8 +4,8 @@ Game* Game::instance = nullptr;
 
 Game::Game(HINSTANCE hInst, LPCWSTR appName) : hInstance(hInst), applicationName(appName) {
 
-	clientWidth = 1920;
-	clientHeight = 1080;
+	clientWidth = 800;
+	clientHeight = 800;
 
 	display = new DisplayWin32(clientWidth, clientHeight);
 	instance = this;

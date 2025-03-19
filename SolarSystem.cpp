@@ -41,7 +41,7 @@ void SolarSystem::Draw()
 		//world position calculation
 		if (objects[i]->parent != nullptr) 
 			//orbital movement
-			objects[i]->translation = objects[i]->parent->translation + Vector3(cos(objects[i]->rotation.ToEuler().y + objects[i]->period) * objects[i]->distanceToParent, 0.0f, sin(objects[i]->rotation.ToEuler().y + objects[i]->period) * objects[i]->distanceToParent);
+			objects[i]->translation = Vector3(cos(objects[i]->rotation.ToEuler().y + objects[i]->period), 0.0f, sin(objects[i]->rotation.ToEuler().y + objects[i]->period)) * objects[i]->distanceToParent;
 
 		if (i == camManager->objectToTrack) {
 
@@ -76,13 +76,13 @@ void SolarSystem::ResetGame()
 
 			if (i != 0) {
 				objects[i]->parent = objects[0];
-				objects[i]->distanceToParent = objects[i]->scale.x * i * 3;
+				objects[i]->distanceToParent = Vector3(objects[i]->scale.x * i * 3, 0.0f, objects[i]->scale.x * i * 3);
 			}
 
 			if (i == 4 || i == 8 || i == 9) {
 				objects[i]->parent = objects[i - 1];
 				objects[i]->speed *= rand() % 5 + 2;
-				objects[i]->distanceToParent = objects[i]->scale.x * (rand() % 3 + 3.0f);
+				objects[i]->distanceToParent = Vector3(objects[i]->scale.x * (rand() % 3 + 3.0f), 0.0f, objects[i]->scale.x * (rand() % 3 + 3.0f));
 			}
 		}
 		else {

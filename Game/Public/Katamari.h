@@ -13,4 +13,5 @@ public:
 	void Draw() override;
 	void ResetGame();
 
+	UINT objectsInside = 1;
 };

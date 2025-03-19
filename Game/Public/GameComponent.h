@@ -48,7 +48,7 @@ public:
 	float speed = 0.0f;
 	float speedMax = 0.0f;
 	float period;
-	float distanceToParent;
+	Vector3 distanceToParent;
 	Vector3 scale;
 	Quaternion rotation;
 	Vector3 translation;

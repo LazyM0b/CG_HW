@@ -78,6 +78,7 @@ void Katamari::Initialize(UINT objCnt) {
 
 	for (auto object : objects)
 		object->collisionEnabled = true;
+	objects[0]->collisionEnabled = false;
 
 	objects[0]->isMovable = false;
 	for (int i = 1; i < objCnt; ++i)
@@ -96,6 +97,22 @@ void Katamari::Draw()
 	}
 	else
 		camManager->UpdatePos(input, camManager->objectPos, clientWidth, clientHeight);
+	for (int i = 2; i < objects.size(); ++i) {
+		if (objects[i]->collisionEnabled && objects[1]->sphereCollider.Intersects(objects[i]->sphereCollider) && objects[1]->sphereCollider.Radius > objects[i]->sphereCollider.Radius) {
+			++objectsInside; 
+			objects[i]->parent = objects[1];
+			objects[i]->collisionEnabled = false;
+			objects[i]->distanceToParent = objects[1]->translation - Vector3(objects[i]->translation.x, objects[i]->scale.x / 2, objects[i]->translation.z);
+			//pos.Normalize();
+			/*pos.x *= cos(objects[1]->rotation.ToEuler().y);
+			pos.z *= sin(objects[1]->rotation.ToEuler().y);*/
+			objects[1]->sphereCollider.Radius += objects[i]->sphereCollider.Radius / (objectsInside * 2.71828);
+			camManager->distance += objectsInside * objects[i]->scale.x / 100;
+		}
+		else if (!objects[i]->collisionEnabled) {
+			objects[i]->translation = Vector3(cos(objects[i]->parent->rotation.ToEuler().y), -sin(objects[i]->parent->rotation.ToEuler().y), sin(objects[i]->parent->rotation.ToEuler().y)) * objects[i]->distanceToParent;
+		}
+	}
 
 	for (auto object : objects)
 		object->Draw(context, camManager);
@@ -121,7 +138,7 @@ void Katamari::ResetGame()
 		float scale = rand() % 1000 + 100.0f;
 		objects[i]->scale = Vector3(scale, scale, scale);
 		objects[i]->translation = Vector3((int)random1(rng) - 15000, 0.0f, (int)random1(rng) - 15000);
-		objects[i]->sphereCollider.Radius = objects[i]->scale.x;
+		objects[i]->sphereCollider.Radius = objects[i]->scale.x / 3;
 		objects[i]->sphereCollider.Center = objects[i]->translation;
 	}
 

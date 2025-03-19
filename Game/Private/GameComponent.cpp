@@ -280,12 +280,17 @@ void GameComponent::Draw(ID3D11DeviceContext* context, CameraManager* camManager
 
 	D3D11_MAPPED_SUBRESOURCE res = {};
 	Vector3 objRotation = this->rotation.ToEuler();
-	if (parent != nullptr)
+	Vector3 tmpTranslation = translation;
+	GameComponent* parent = this->parent;
+	while (parent != nullptr) {
 		objRotation += parent->rotation.ToEuler();
+		tmpTranslation += parent->translation;
+		parent = parent->parent;
+	}
 
 	positionL = Matrix::CreateScale(scale);
 	positionL *= Matrix::CreateFromYawPitchRoll(objRotation);
-	positionL *= Matrix::CreateTranslation(translation);
+	positionL *= Matrix::CreateTranslation(tmpTranslation);
 
 	//projection view calculation
 	positionW = positionL * camManager->viewMatrix;
